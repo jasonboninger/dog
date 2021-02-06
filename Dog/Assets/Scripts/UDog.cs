@@ -58,20 +58,17 @@ namespace Assets.Scripts
 			_Mood();
 		}
 
-		public void Point(InputAction.CallbackContext point) => _point = point.ReadValue<Vector2>();
+		public void Point(InputAction.CallbackContext point)
+		{
+			_point = point.ReadValue<Vector2>();
+		}
 
 		public void Click(InputAction.CallbackContext click)
 		{
-			if (click.performed && click.control.IsPressed())
+			if (click.performed && click.control.IsPressed() && Physics.Raycast(Camera.main.ScreenPointToRay(_point), out var hit))
 			{
-				Debug.Log("CLICKED @ " + _point);
-				if (Physics.Raycast(Camera.main.ScreenPointToRay(_point), out var hit))
-				{
-					Debug.Log("HIT @ " + _point);
-					Debug.DrawRay(hit.point, Vector3.up, Color.white, duration: 1);
-					_destination = hit.point;
-					_destination.y = 0;
-				}
+				_destination = hit.point;
+				_destination.y = 0;
 			}
 		}
 
