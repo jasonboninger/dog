@@ -1,61 +1,57 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Utilities;
+using System.Collections;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Assets.Scripts
 {
 	public class UDog : MonoBehaviour
 	{
-		private static readonly int _animatorSpeed = Animator.StringToHash("Speed");
-		private static readonly int _animatorWalking = Animator.StringToHash("Walking");
-
 		[SerializeField] private float _speedMaximum = default;
 		[SerializeField] private float _speedMinimum = default;
 		[SerializeField] private float _speedAcceleration = default;
 		[SerializeField] private float _distanceSlow = default;
 		[SerializeField] private Transform _look = default;
 
-		private bool _Walking { get => _animator.GetBool(_animatorWalking); set => _animator.SetBool(_animatorWalking, value); }
-		private float _Speed { get => _animator.GetFloat(_animatorSpeed); set => _animator.SetFloat(_animatorSpeed, value); }
-		private float _Happy { get => _animator.GetLayerWeight(_animatorTailHappy); set => _animator.SetLayerWeight(_animatorTailHappy, value); }
-
 		private Animator _animator;
-		private int _animatorTailHappy;
+		private AnimatorParameterBool _walking;
+		private AnimatorParameterFloat _speed;
+		private AnimatorParameterTrigger _ready;
+		private AnimatorLayerWeight _tailHappy;
+		private int _base;
 		private float _speedCurrent;
 		private Vector2 _point;
 		private Vector3 _destination;
+		private Coroutine _readyWaiter;
 
 		void Start()
 		{
 			_animator = GetComponentInChildren<Animator>();
-			_animatorTailHappy = _animator.GetLayerIndex("TailHappy");
+			_walking = new AnimatorParameterBool(_animator, "Walking");
+			_speed = new AnimatorParameterFloat(_animator, "Speed");
+			_ready = new AnimatorParameterTrigger(_animator, "Ready");
+			_tailHappy = new AnimatorLayerWeight(_animator, "TailHappy");
+			_base = _animator.GetLayerIndex("Base");
 		}
 
 		void Update()
 		{
-			var direction = _destination - transform.position;
-			var distanceRemaining = direction.magnitude;
+			var state = _animator.GetCurrentAnimatorStateInfo(_base);
+			var transition = _animator.GetAnimatorTransitionInfo(_base);
+			var idle = !transition.IsName("Idle -> Ready") && state.IsName("Idle");
+			var walk = transition.IsName("Idle -> Walk") || state.IsName("Walk");
 
-			_Speed = Mathf.Lerp(_speedMinimum, _speedCurrent, distanceRemaining / _distanceSlow);
+			_walking.Value = !_destination.Equals(transform.position);
 
-			_Walking = _Speed > _speedMinimum;
-
-			var distanceTravel = _Speed * Time.deltaTime;
-			var position = Vector3.MoveTowards(transform.position, _destination, distanceTravel);
-			if (!direction.normalized.Equals(Vector3.zero))
+			if (_walking.Value && (idle || walk))
 			{
-				var rotation = Quaternion.LookRotation(direction);
-				transform.SetPositionAndRotation(position, rotation);
-				_speedCurrent = Mathf.Clamp(_speedCurrent + _speedAcceleration * Time.deltaTime, _speedMinimum, _speedMaximum);
-				_Look(false);
-			}
-			else
-			{
-				transform.position = position;
-				_speedCurrent = _speedMinimum;
-				_Look(true);
+				_Walk(_destination);
 			}
 
 			_Mood();
+
+			_Look(!walk);
+			_Ready(idle);
 		}
 
 		public void Point(InputAction.CallbackContext point)
@@ -69,6 +65,29 @@ namespace Assets.Scripts
 			{
 				_destination = hit.point;
 				_destination.y = 0;
+			}
+		}
+
+		private void _Walk(Vector3 destination)
+		{
+			var direction = destination - transform.position;
+			var distanceRemaining = direction.magnitude;
+
+			_speed.Value = Mathf.Lerp(_speedMinimum, _speedCurrent, distanceRemaining / _distanceSlow);
+
+			var distanceTravel = _speed.Value * Time.deltaTime;
+			var position = Vector3.MoveTowards(transform.position, destination, distanceTravel);
+			if (!direction.normalized.Equals(Vector3.zero))
+			{
+				var rotation = Quaternion.LookRotation(direction);
+				transform.SetPositionAndRotation(position, rotation);
+				_speedCurrent = Mathf.Clamp(_speedCurrent + _speedAcceleration * Time.deltaTime, _speedMinimum, _speedMaximum);
+				_Look(false);
+			}
+			else
+			{
+				transform.position = position;
+				_speedCurrent = _speedMinimum;
 			}
 		}
 
@@ -103,7 +122,7 @@ namespace Assets.Scripts
 		{
 			float speed;
 			float happy;
-			if (_Walking)
+			if (_walking.Value)
 			{
 				speed = 2;
 				happy = 0.2f;
@@ -120,7 +139,32 @@ namespace Assets.Scripts
 				speed = 2;
 				happy = Mathf.Lerp(0, 1, 1 - (distance - goal) / (maximum - goal));
 			}
-			_Happy = Mathf.MoveTowards(_Happy, happy, speed * Time.deltaTime);
+			_tailHappy.Weight = Mathf.MoveTowards(_tailHappy.Weight, happy, speed * Time.deltaTime);
+		}
+
+		private void _Ready(bool ready)
+		{
+			if (!ready)
+			{
+				if (_readyWaiter != null)
+				{
+					StopCoroutine(_readyWaiter);
+				}
+				_readyWaiter = null;
+			}
+			else
+			{
+				if (_readyWaiter == null)
+				{
+					IEnumerator waitForReady()
+					{
+						yield return new WaitForSeconds(Random.Range(5, 10));
+						_ready.Trigger();
+						_readyWaiter = null;
+					}
+					_readyWaiter = StartCoroutine(waitForReady());
+				}
+			}
 		}
 	}
 }
