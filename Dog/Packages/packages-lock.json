@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.boninger-works.unity": {
+      "version": "git+https://BoningerWorks@dev.azure.com/BoningerWorks/Packages/_git/UnityCSharp#483b253e77cb39c475c14f84d1753e699935ed16",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "483b253e77cb39c475c14f84d1753e699935ed16"
+    },
     "com.unity.collab-proxy": {
       "version": "1.3.9",
       "depth": 0,
