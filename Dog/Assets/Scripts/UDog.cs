@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace Assets.Scripts
 {
+	[RequireComponent(typeof(Animator))]
 	public class UDog : MonoBehaviour
 	{
 		[SerializeField] private float _speedMaximum = default;
@@ -24,9 +25,13 @@ namespace Assets.Scripts
 		private Vector3 _destination;
 		private Coroutine _readyWaiter;
 
+		protected void Awake()
+		{
+			_animator = GetComponent<Animator>();
+		}
+
 		protected void Start()
 		{
-			_animator = GetComponentInChildren<Animator>();
 			_walking = new AnimatorParameterBool(_animator, "Walking");
 			_speed = new AnimatorParameterFloat(_animator, "Speed");
 			_ready = new AnimatorParameterTrigger(_animator, "Ready");
