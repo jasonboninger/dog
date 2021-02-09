@@ -24,7 +24,7 @@ namespace Assets.Scripts
 		private Vector3 _destination;
 		private Coroutine _readyWaiter;
 
-		void Start()
+		protected void Start()
 		{
 			_animator = GetComponentInChildren<Animator>();
 			_walking = new AnimatorParameterBool(_animator, "Walking");
@@ -34,7 +34,7 @@ namespace Assets.Scripts
 			_base = _animator.GetLayerIndex("Base");
 		}
 
-		void Update()
+		protected void Update()
 		{
 			var state = _animator.GetCurrentAnimatorStateInfo(_base);
 			var transition = _animator.GetAnimatorTransitionInfo(_base);
