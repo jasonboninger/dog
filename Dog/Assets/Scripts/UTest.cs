@@ -145,7 +145,7 @@ namespace Assets.Scripts
 			_actionPlanner.AddAction(new GetDown());
 		}
 
-		protected void Update()
+		protected void Start()
 		{
 			_PlanActions();
 		}
@@ -161,11 +161,17 @@ namespace Assets.Scripts
 				);
 			var plan = _actionPlanner.GetPlan();
 			_actionPlanner.PopulatePlan(plan, state, _goal);
-			//Debug.Log(plan.Cycles);
-			//foreach (var step in plan.Steps)
-			//{
-			//	Debug.Log(step.Action.GetType().Name);
-			//}
+			
+			
+			
+			Debug.Log(plan.Cycles);
+			foreach (var step in plan.Steps)
+			{
+				Debug.Log(step.Action.GetType().Name);
+			}
+			
+			
+			
 			_actionPlanner.ReleasePlan(plan);
 			_actionPlanner.ReleaseState(state);
 		}
