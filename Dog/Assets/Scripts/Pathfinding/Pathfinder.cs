@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Pathfinding.Interfaces;
+using Assets.Scripts.Utilities;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ namespace Assets.Scripts.Pathfinding
 		private readonly Searcher _searcher = new Searcher();
 		private readonly List<Agent> _agents = new List<Agent>();
 		private readonly List<Obstacle> _obstacles = new List<Obstacle>();
-		private readonly Stack<Path> _paths = new Stack<Path>();
+		private readonly Reusable<Path> _paths = new Reusable<Path>(path => path.positions.Clear());
 		private readonly Dictionary<int, Agent> _sizeToAgentMappings = new Dictionary<int, Agent>();
 
 		public Pathfinder(float precision = 1) => _precision = precision;
@@ -49,16 +50,10 @@ namespace Assets.Scripts.Pathfinding
 			}
 		}
 
-		public IPath CreatePath()
+		public IPath GetPath()
 		{
-			// Check if path exists
-			if (_paths.Count > 0)
-			{
-				// Return path
-				return _paths.Pop();
-			}
 			// Return path
-			return new Path();
+			return _paths.GetOrCreate();
 		}
 
 		public void PopulatePath(IPath path, Vector2 start, Vector2 end, float radius)
@@ -85,12 +80,8 @@ namespace Assets.Scripts.Pathfinding
 
 		public void ReleasePath(IPath path)
 		{
-			// Get converted path
-			var pathConverted = (Path)path;
-			// Clear positions
-			pathConverted.positions.Clear();
-			// Add path
-			_paths.Push(pathConverted);
+			// Return path to pool
+			_paths.ReturnToPool((Path)path);
 		}
 
 		private Agent _GetOrCreateAgent(float radius)
