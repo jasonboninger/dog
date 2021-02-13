@@ -72,7 +72,7 @@ namespace Assets.Scripts.Pathfinding
 					}
 					var costKnown = previous.costKnown + Vector2Int.Distance(previous.coordinate, coordinateNew);
 					var costEstimated = costKnown + estimateCost(coordinateNew);
-					if (waypoints.Find(waypoint => waypoint.coordinate == coordinateNew && waypoint.costEstimated <= costEstimated) != null)
+					if (waypoints.Find(waypoint => waypoint.coordinate == coordinateNew && waypoint.costKnown <= costKnown) != null)
 					{
 						return;
 					}
