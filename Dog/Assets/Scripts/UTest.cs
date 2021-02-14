@@ -131,7 +131,7 @@ namespace Assets.Scripts
 		private class Goal : IGoal<State>
 		{
 			public float CostEffort => 0;
-			public float CostLimit => float.MaxValue;
+			public float CostLimit => 200;
 
 			public float EstimateProximity(State state) => state.enemy.health * 3;
 
