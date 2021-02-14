@@ -14,14 +14,12 @@ namespace Assets.Scripts.Utilities
 		
 		public TValue GetOrCreate()
 		{
-			// Check if plan exists
-			if (_values.Count > 0)
-			{
-				// Return value
-				return _values.Pop();
-			}
+			// Get or create value
+			var value = _values.Count > 0 ? _values.Pop() : new TValue();
+			// Reset value
+			_reset(value);
 			// Return value
-			return new TValue();
+			return value;
 		}
 
 		public void ReturnToPool(TValue value)
