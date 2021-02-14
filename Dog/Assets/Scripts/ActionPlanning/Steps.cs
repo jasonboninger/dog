@@ -13,9 +13,26 @@ namespace Assets.Scripts.ActionPlanning
 				// Set steps
 				_steps = new Reusable<Step>(step =>
 				{
-					// Release states
-					states.Release(step.from);
-					states.Release(step.to);
+					// Get from
+					var from = step.from;
+					// Check if from exists
+					if (from != null)
+					{
+						// Release from
+						states.Release(from);
+						// Clear from
+						step.from = null;
+					}
+					// Get to
+					var to = step.to;
+					// Check if to exists
+					if (to != null)
+					{
+						// Release to
+						states.Release(to);
+						// Clear to
+						step.to = null;
+					}
 					// Clear action
 					step.action = default;
 				});
