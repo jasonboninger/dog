@@ -89,6 +89,8 @@ namespace Assets.Scripts.ActionPlanning
 			}
 			// Clear cycles
 			plan.cycles = 0;
+			// Clear cost
+			plan.cost = 0;
 		}
 	}
 }

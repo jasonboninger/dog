@@ -12,6 +12,9 @@ namespace Assets.Scripts.ActionPlanning
 
 			public int cycles = 0;
 			int IPlan<TState, TAction>.Cycles => cycles;
+
+			public float cost = 0;
+			float IPlan<TState, TAction>.Cost => cost;
 		}
 	}
 }

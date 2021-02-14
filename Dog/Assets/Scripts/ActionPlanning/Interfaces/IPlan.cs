@@ -6,5 +6,6 @@ namespace Assets.Scripts.ActionPlanning.Interfaces
 	{
 		IReadOnlyList<IStep<TState, TAction>> Steps { get; }
 		int Cycles { get; }
+		float Cost { get; }
 	}
 }

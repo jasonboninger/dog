@@ -129,9 +129,12 @@ namespace Assets.Scripts
 
 		private class Goal : IGoal<State>
 		{
+			public float CostEffort => 0;
+			public float CostLimit => float.MaxValue;
+
 			public float EstimateProximity(State state) => state.enemy.health * 3;
 
-			public bool IsAchieved(State state) => state.enemy.health <= 0;
+			public float IsAchieved(State state) => state.enemy.health <= 0 ? 1 : 0;
 		}
 
 		private readonly ActionPlanner<State, IAction<State>> _actionPlanner = new ActionPlanner<State, IAction<State>>();

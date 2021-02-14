@@ -67,7 +67,8 @@ namespace Assets.Scripts.ActionPlanning
 					TState state,
 					TAction action,
 					float costKnown,
-					float costEstimated
+					float costEstimated,
+					float achieved
 				)
 				{
 					// Get action point
@@ -78,6 +79,7 @@ namespace Assets.Scripts.ActionPlanning
 					actionPoint.action = action;
 					actionPoint.costKnown = costKnown;
 					actionPoint.costEstimated = costEstimated;
+					actionPoint.achieved = achieved;
 					// Add action point
 					_cache.Add(actionPoint);
 					// Return action point
@@ -108,9 +110,11 @@ namespace Assets.Scripts.ActionPlanning
 				public TAction action;
 				public float costKnown;
 				public float costEstimated;
+				public float achieved;
 			}
 
 			private IGoal<TState> _goal;
+			private float _costLimit;
 
 			private readonly Steps _steps;
 			private readonly StatesCache _statesCache;
@@ -131,46 +135,94 @@ namespace Assets.Scripts.ActionPlanning
 
 			public void PopulatePlan(Plan plan, TState state, IGoal<TState> goal)
 			{
-				// Set goal
-				_goal = goal;
 				// Reset cache
 				_ResetCache();
+				// Set goal
+				_goal = goal;
+				// Get effort cost
+				var costEffort = goal.CostEffort;
+				// Set cost limit
+				_costLimit = goal.CostLimit;
+				// Initialize goal action point
+				var actionPointGoal = _InitializeActionPointGoal();
+				// Initialize action points
+				_InitializeActionPoints(state);
 				// Get action points
 				var actionPoints = _actionPoints;
-				// Add action point
-				actionPoints.Add(_actionPointsCache.GetAndCache(previous: null, state, action: default, costKnown: 0, costEstimated: 0));
 				// Create cycles
 				var cycles = 0;
 				// Search action points
 				while (actionPoints.Count > 0)
 				{
 					// Increment cycles
-					if (cycles++ > 1000)
-					{
-						// Throw error
-						throw new InvalidOperationException("Too many cycles.");
-					}
+					cycles++;
 					// Get action point
 					var actionPoint = actionPoints[0];
 					// Remove action point
 					actionPoints.RemoveAt(0);
-					// Check if goal is achieved
-					if (goal.IsAchieved(actionPoint.state))
+					// Get achieved
+					var achieved = actionPoint.achieved;
+					// Check if achieved
+					if (achieved > 0)
 					{
-						// Populate steps
-						_PopulateSteps(plan, actionPoint);
-						// Set cycles
-						plan.cycles = cycles;
+						// Check if better than goal action point
+						if (actionPointGoal == null || achieved > actionPointGoal.achieved)
+						{
+							// Set goal action point
+							actionPointGoal = actionPoint;
+							// Check if best goal action point
+							if (achieved >= 1)
+							{
+								// Stop loop
+								break;
+							}
+						}
+						// Continue loop
+						break;
+					}
+					// Check if goal action point exists and effort cost is reached
+					if (actionPointGoal != null && actionPoint.costKnown > costEffort)
+					{
 						// Stop loop
 						break;
 					}
 					// Add action points
 					_AddActionPoints(actionPoint);
 				}
-				// Clear action points
-				actionPoints.Clear();
+				// Check if goal action point exists
+				if (actionPointGoal != null)
+				{
+					// Populate steps
+					_PopulateSteps(plan, actionPointGoal);
+					// Set cycles
+					plan.cycles = cycles;
+					// Set cost
+					plan.cost = actionPointGoal.costKnown;
+				}
 				// Reset cache
 				_ResetCache();
+			}
+
+			private static ActionPoint _InitializeActionPointGoal()
+			{
+				// Return no action point
+				return null;
+			}
+
+			private void _InitializeActionPoints(TState state)
+			{
+				// Create action point
+				var actionPoint = _actionPointsCache.GetAndCache
+					(
+						previous: null,
+						state,
+						action: default,
+						costKnown: 0,
+						costEstimated: 0,
+						achieved: _goal.IsAchieved(state)
+					);
+				// Add action point
+				_actionPoints.Add(actionPoint);
 			}
 
 			private void _AddActionPoints(ActionPoint actionPoint)
@@ -199,14 +251,22 @@ namespace Assets.Scripts.ActionPlanning
 				}
 				// Get known cost
 				var costKnown = previous.costKnown + action.GetCost(state);
+				// Check if known cost is greater than cost limit
+				if (costKnown > _costLimit)
+				{
+					// Action is too expensive
+					return;
+				}
 				// Get new state
 				var stateNew = _statesCache.GetAndCache(state);
 				// Update new state
 				action.UpdateState(stateNew);
 				// Get estimated cost
 				var costEstimated = costKnown + _goal.EstimateProximity(stateNew);
+				// Get achieved
+				var achieved = _goal.IsAchieved(stateNew);
 				// Get action point
-				var actionPoint = _actionPointsCache.GetAndCache(previous, stateNew, action, costKnown, costEstimated);
+				var actionPoint = _actionPointsCache.GetAndCache(previous, stateNew, action, costKnown, costEstimated, achieved);
 				// Get action points
 				var actionPoints = _actionPoints;
 				// Get count
@@ -244,13 +304,14 @@ namespace Assets.Scripts.ActionPlanning
 						// No more steps
 						break;
 					}
+					// Get from
+					var from = _statesCache.Get(previous.state);
+					// Get to
+					var to = _statesCache.Get(actionPoint.state);
+					// Get action
+					var action = actionPoint.action;
 					// Get step
-					var step = stepsReusable.Get
-						(
-							from: _statesCache.Get(previous.state),
-							to: _statesCache.Get(actionPoint.state),
-							action: actionPoint.action
-						);
+					var step = stepsReusable.Get(from, to, action);
 					// Add step
 					steps.Add(step);
 					// Set action point
@@ -262,6 +323,8 @@ namespace Assets.Scripts.ActionPlanning
 
 			private void _ResetCache()
 			{
+				// Clear action points
+				_actionPoints.Clear();
 				// Release states cache
 				_statesCache.ReleaseCache();
 				// Release action points cache
