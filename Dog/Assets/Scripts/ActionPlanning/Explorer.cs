@@ -178,7 +178,7 @@ namespace Assets.Scripts.ActionPlanning
 							}
 						}
 						// Continue loop
-						break;
+						continue;
 					}
 					// Check if goal action point exists and effort cost is reached
 					if (actionPointGoal != null && actionPoint.costKnown > costEffort)
