@@ -192,6 +192,8 @@ namespace Assets.Scripts.ActionPlanning
 				// Check if goal action point exists
 				if (actionPointGoal != null)
 				{
+					// Set success
+					plan.success = true;
 					// Populate steps
 					_PopulateSteps(plan, actionPointGoal);
 					// Set cycles

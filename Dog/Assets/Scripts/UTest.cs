@@ -168,6 +168,7 @@ namespace Assets.Scripts
 
 
 
+			Debug.Log("Success: " + plan.Success);
 			Debug.Log("Cycles: " + plan.Cycles);
 			Debug.Log("Cost: " + plan.Cost);
 			Debug.Log("Actions: " + string.Join(", ", plan.Steps.Select(step => step.Action.GetType().Name)));

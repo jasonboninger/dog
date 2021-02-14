@@ -75,6 +75,8 @@ namespace Assets.Scripts.ActionPlanning
 
 		private void _ResetPlan(Plan plan)
 		{
+			// Clear success
+			plan.success = false;
 			// Get reusable steps
 			var stepsReusable = _steps;
 			// Get steps

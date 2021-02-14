@@ -7,6 +7,9 @@ namespace Assets.Scripts.ActionPlanning
 	{
 		private class Plan : IPlan<TState, TAction>
 		{
+			public bool success = false;
+			bool IPlan<TState, TAction>.Success => success;
+
 			public readonly List<Step> steps = new List<Step>();
 			IReadOnlyList<IStep<TState, TAction>> IPlan<TState, TAction>.Steps => steps;
 
