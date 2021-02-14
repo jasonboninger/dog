@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.ActionPlanning;
 using Assets.Scripts.ActionPlanning.Interfaces;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -164,14 +165,12 @@ namespace Assets.Scripts
 				);
 			var plan = _actionPlanner.GetPlan();
 			_actionPlanner.PopulatePlan(plan, state, _goal);
-			
-			
-			
-			Debug.Log(plan.Cycles);
-			foreach (var step in plan.Steps)
-			{
-				Debug.Log(step.Action.GetType().Name);
-			}
+
+
+
+			Debug.Log("Cycles: " + plan.Cycles);
+			Debug.Log("Cost: " + plan.Cost);
+			Debug.Log("Actions: " + string.Join(", ", plan.Steps.Select(step => step.Action.GetType().Name)));
 			
 			
 			
