@@ -4,6 +4,7 @@ using Assets.Scripts.Dogs.Actions;
 using Assets.Scripts.Dogs.Extensions;
 using Assets.Scripts.Dogs.Goals;
 using Assets.Scripts.Dogs.Models;
+using Assets.Scripts.Dogs.States;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -16,11 +17,11 @@ namespace Assets.Scripts.Dogs
 	[RequireComponent(typeof(UWalk))]
 	public class UDog : MonoBehaviour
 	{
-		private ActionPlanner<State, UAction> _planner;
-		private State _state;
-		private IPlan<State, UAction> _plan;
-		private Dog _dog;
-		private IGoal<State> _goal;
+		private ActionPlanner<Dog, UAction> _planner;
+		private Dog _state;
+		private IPlan<Dog, UAction> _plan;
+		private Controls _controls;
+		private IGoal<Dog> _goal;
 		private UOwner _owner;
 		private IAction _action;
 		private int _actionIndex;
@@ -35,13 +36,13 @@ namespace Assets.Scripts.Dogs
 		protected void Awake()
 		{
 			// Set planner
-			_planner = new ActionPlanner<State, UAction>();
+			_planner = new ActionPlanner<Dog, UAction>();
 			// Set state
 			_state = _planner.GetState();
 			// Set plan
 			_plan = _planner.GetPlan();
-			// Set dog
-			_dog = new Dog(transform, GetComponent<Animator>(), new Looker(), _state);
+			// Set controls
+			_controls = new Controls(_state, transform, GetComponent<Animator>(), new Looker());
 			// Set goal
 			_goal = new ReachDestination();
 			// Set owner
@@ -83,13 +84,13 @@ namespace Assets.Scripts.Dogs
 		private void _InitializeActions()
 		{
 			// Add default action
-			_actionDefault = GetComponent<UIdle>().InitializeAndAddAndReturn(_planner, _dog);
+			_actionDefault = GetComponent<UIdle>().InitializeAndAddAndReturn(_planner, _controls);
 			// Set action
 			_action = _actionDefault;
 			// Set action index
 			_actionIndex = 0;
 			// Add other actions
-			GetComponent<UWalk>().InitializeAndAddAndReturn(_planner, _dog);
+			GetComponent<UWalk>().InitializeAndAddAndReturn(_planner, _controls);
 		}
 
 		private IEnumerator _ExecuteActions()

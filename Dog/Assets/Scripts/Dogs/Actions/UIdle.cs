@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Dogs.Models;
+﻿using Assets.Scripts.Dogs.States;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -13,11 +13,11 @@ namespace Assets.Scripts.Dogs.Actions
 
 		protected override void Initialize() { }
 
-		protected override bool IsValid(State state) => true;
+		protected override bool IsValid(Dog state) => true;
 
-		protected override float GetCost(State state) => 1000000;
+		protected override float GetCost(Dog state) => 1000000;
 
-		protected override void UpdateState(State state) { }
+		protected override void UpdateState(Dog state) { }
 
 		protected override float GetTransitionTime() => _transitionTime;
 

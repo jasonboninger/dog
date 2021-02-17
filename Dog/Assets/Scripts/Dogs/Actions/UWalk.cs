@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Dogs.Models;
+﻿using Assets.Scripts.Dogs.States;
 using Assets.Scripts.Static;
 using Assets.Scripts.Utilities;
 using System;
@@ -30,11 +30,11 @@ namespace Assets.Scripts.Dogs.Actions
 			_speed = new AnimatorParameterFloat(Animator, "Core_Walk---Speed");
 		}
 
-		protected override bool IsValid(State state) => state.Destination.HasValue;
+		protected override bool IsValid(Dog state) => state.Destination.HasValue;
 
-		protected override float GetCost(State state) => Vector2.Distance(state.Position, state.Destination.Value);
+		protected override float GetCost(Dog state) => Vector2.Distance(state.Position, state.Destination.Value);
 
-		protected override void UpdateState(State state) => state.Destination = null;
+		protected override void UpdateState(Dog state) => state.Destination = null;
 
 		protected override float GetTransitionTime() => _transitionTime;
 

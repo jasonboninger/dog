@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.ActionPlanning.Interfaces;
 using Assets.Scripts.Dogs.Models;
+using Assets.Scripts.Dogs.States;
 using Assets.Scripts.Static;
 using System;
 using System.Collections;
@@ -13,11 +14,11 @@ namespace Assets.Scripts.Dogs
 		Walk,
 	}
 	
-	public interface IAction : IAction<State>
+	public interface IAction : IAction<Dog>
 	{
 		EAction Id { get; }
 
-		void Initialize(Dog dog);
+		void Initialize(Controls controls);
 
 		float GetTransitionTime();
 
@@ -32,41 +33,41 @@ namespace Assets.Scripts.Dogs
 	{
 		public EAction Id { get; }
 
-		protected Dog Dog { get; private set; }
+		protected Controls Controls { get; private set; }
+		protected Dog State { get; private set; }
 		protected Transform Transform { get; private set; }
 		protected Animator Animator { get; private set; }
 		protected Looker Looker { get; private set; }
-		protected State State { get; private set; }
 
 		private Coroutine _enteringExiting;
 
 		protected UAction(EAction id) => Id = id;
 
 		protected abstract void Initialize();
-		void IAction.Initialize(Dog dog)
+		void IAction.Initialize(Controls controls)
 		{
-			// Set dog
-			Dog = dog;
-			// Set transform
-			Transform = dog.Transform;
-			// Set animator
-			Animator = dog.Animator;
-			// Set looker
-			Looker = dog.Looker;
+			// Set controls
+			Controls = controls;
 			// Set state
-			State = dog.State;
+			State = controls.State;
+			// Set transform
+			Transform = controls.Transform;
+			// Set animator
+			Animator = controls.Animator;
+			// Set looker
+			Looker = controls.Looker;
 			// Execute intialize
 			Initialize();
 		}
 
-		protected abstract bool IsValid(State state);
-		bool IAction<State>.IsValid(State state) => IsValid(state);
+		protected abstract bool IsValid(Dog state);
+		bool IAction<Dog>.IsValid(Dog state) => IsValid(state);
 
-		protected abstract float GetCost(State state);
-		float IAction<State>.GetCost(State state) => GetCost(state);
+		protected abstract float GetCost(Dog state);
+		float IAction<Dog>.GetCost(Dog state) => GetCost(state);
 
-		protected abstract void UpdateState(State state);
-		void IAction<State>.UpdateState(State state)
+		protected abstract void UpdateState(Dog state);
+		void IAction<Dog>.UpdateState(Dog state)
 		{
 			// Set action
 			state.Action = Id;
@@ -83,7 +84,7 @@ namespace Assets.Scripts.Dogs
 			// Stop exit
 			this.StopCoroutineIfExists(_enteringExiting);
 			// Set action
-			Dog.State.Action = Id;
+			State.Action = Id;
 			// Execute enter
 			_enteringExiting = StartCoroutine(Enter(transitionTime));
 		}
