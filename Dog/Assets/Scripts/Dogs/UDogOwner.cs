@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 namespace Assets.Scripts.Dogs
 {
-	public class UOwner : MonoBehaviour
+	public class UDogOwner : MonoBehaviour
 	{
 		private readonly BwEvent<Vector3> _click_ = new BwEvent<Vector3>();
 		public IBwEvent<Vector3> Click_ => _click_;

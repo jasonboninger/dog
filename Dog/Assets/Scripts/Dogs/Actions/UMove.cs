@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Dogs.Actions
 {
-	public class UWalk : UAction
+	public class UMove : UDogAction
 	{
 		private static readonly Vector2 _zero = new Vector2(0, 0);
 
@@ -20,8 +20,6 @@ namespace Assets.Scripts.Dogs.Actions
 		private AnimatorLayerWeight _walk;
 		private AnimatorParameterFloat _speed;
 
-		public UWalk() : base(EAction.Walk) { }
-
 		protected override void Initialize()
 		{
 			// Set walk
@@ -30,11 +28,11 @@ namespace Assets.Scripts.Dogs.Actions
 			_speed = new AnimatorParameterFloat(Animator, "Core_Walk---Speed");
 		}
 
-		protected override bool IsValid(Dog state) => state.Destination.HasValue;
+		protected override bool IsValid(Dog state) => state.LaserPointer.On;
 
-		protected override float GetCost(Dog state) => Vector2.Distance(state.Position, state.Destination.Value);
+		protected override float GetCost(Dog state) => Vector2.Distance(state.Position, state.LaserPointer.Position);
 
-		protected override void UpdateState(Dog state) => state.Destination = null;
+		protected override void UpdateState(Dog state) => state.LaserPointer.On = false;
 
 		protected override float GetTransitionTime() => _transitionTime;
 
@@ -48,13 +46,13 @@ namespace Assets.Scripts.Dogs.Actions
 
 		protected override IEnumerator Execute(Func<bool> cancelled)
 		{
-			// Move to destination while not cancelled
+			// Move to laser pointer while not cancelled
 			while (!cancelled())
 			{
-				// Check if destination does not exist
-				if (!State.Destination.HasValue)
+				// Check if laser pointer is not on
+				if (!State.LaserPointer.On)
 				{
-					// No destination
+					// No laser pointer
 					yield break;
 				}
 				// Get delta time
@@ -62,7 +60,7 @@ namespace Assets.Scripts.Dogs.Actions
 				// Get position
 				var position = new Vector2(Transform.position.x, Transform.position.z);
 				// Get destination
-				var destination = State.Destination.Value;
+				var destination = State.LaserPointer.Position;
 				// Get direction
 				var direction = destination - position;
 				// Get distance
@@ -86,9 +84,9 @@ namespace Assets.Scripts.Dogs.Actions
 				// Check if destination reached
 				if (position.Equals(destination))
 				{
-					// Clear destination
-					State.Destination = null;
-					// Destination reached
+					// Clear laser pointer
+					State.LaserPointer.On = false;
+					// Laser pointer reached
 					yield break;
 				}
 				// Wait a frame

@@ -5,7 +5,6 @@ namespace Assets.Scripts.Dogs.States
 {
 	public class Dog : IState<Dog>
 	{
-		public EAction Action { get; set; }
 		public Vector2 Position { get; set; }
 		public Vector2 Speed { get; set; }
 
@@ -14,7 +13,6 @@ namespace Assets.Scripts.Dogs.States
 
 		public void Reset()
 		{
-			Action = default;
 			Position = default;
 			Speed = default;
 			Owner.Reset();
@@ -23,7 +21,6 @@ namespace Assets.Scripts.Dogs.States
 
 		public void Set(Dog state)
 		{
-			Action = state.Action;
 			Position = state.Position;
 			Speed = state.Speed;
 			Owner.Set(state.Owner);

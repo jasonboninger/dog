@@ -5,17 +5,15 @@ using UnityEngine;
 
 namespace Assets.Scripts.Dogs.Actions
 {
-	public class UIdle : UAction
+	public class UIdle : UDogAction
 	{
 		[SerializeField] private float _transitionTime = default;
 		
-		public UIdle() : base(EAction.Idle) { }
-
 		protected override void Initialize() { }
 
-		protected override bool IsValid(Dog state) => true;
+		protected override bool IsValid(Dog state) => false;
 
-		protected override float GetCost(Dog state) => 1000000;
+		protected override float GetCost(Dog state) => 0;
 
 		protected override void UpdateState(Dog state) { }
 

@@ -1,4 +1,6 @@
-﻿using Assets.Scripts.ActionPlanning.Interfaces;
+﻿using Assets.Scripts.ActionManagement.Interfaces;
+using Assets.Scripts.ActionPlanning.Interfaces;
+using Assets.Scripts.Dogs.Interfaces;
 using Assets.Scripts.Dogs.Models;
 using Assets.Scripts.Dogs.States;
 using Assets.Scripts.Static;
@@ -8,31 +10,8 @@ using UnityEngine;
 
 namespace Assets.Scripts.Dogs
 {
-	public enum EAction
+	public abstract class UDogAction : MonoBehaviour, IDogAction
 	{
-		Idle,
-		Walk,
-	}
-	
-	public interface IAction : IAction<Dog>
-	{
-		EAction Id { get; }
-
-		void Initialize(Controls controls);
-
-		float GetTransitionTime();
-
-		void Enter(float transitionTime);
-
-		IEnumerator Execute(Func<bool> cancelled);
-
-		void Exit(float transitionTime);
-	}
-	
-	public abstract class UAction : MonoBehaviour, IAction
-	{
-		public EAction Id { get; }
-
 		protected Controls Controls { get; private set; }
 		protected Dog State { get; private set; }
 		protected Transform Transform { get; private set; }
@@ -41,10 +20,8 @@ namespace Assets.Scripts.Dogs
 
 		private Coroutine _enteringExiting;
 
-		protected UAction(EAction id) => Id = id;
-
 		protected abstract void Initialize();
-		void IAction.Initialize(Controls controls)
+		void IDogAction.Initialize(Controls controls)
 		{
 			// Set controls
 			Controls = controls;
@@ -67,33 +44,25 @@ namespace Assets.Scripts.Dogs
 		float IAction<Dog>.GetCost(Dog state) => GetCost(state);
 
 		protected abstract void UpdateState(Dog state);
-		void IAction<Dog>.UpdateState(Dog state)
-		{
-			// Set action
-			state.Action = Id;
-			// Execute update state
-			UpdateState(state);
-		}
+		void IAction<Dog>.UpdateState(Dog state) => UpdateState(state);
 
 		protected abstract float GetTransitionTime();
-		float IAction.GetTransitionTime() => GetTransitionTime();
+		float IActionState.GetTransitionTime() => GetTransitionTime();
 
 		protected abstract IEnumerator Enter(float transitionTime);
-		void IAction.Enter(float transitionTime)
+		void IActionState.Enter(float transitionTime)
 		{
 			// Stop exit
 			this.StopCoroutineIfExists(_enteringExiting);
-			// Set action
-			State.Action = Id;
 			// Execute enter
 			_enteringExiting = StartCoroutine(Enter(transitionTime));
 		}
 
 		protected abstract IEnumerator Execute(Func<bool> cancelled);
-		IEnumerator IAction.Execute(Func<bool> cancelled) => Execute(cancelled);
+		IEnumerator IActionState.Execute(Func<bool> cancelled) => Execute(cancelled);
 
 		protected abstract IEnumerator Exit(float transitionTime);
-		void IAction.Exit(float transitionTime)
+		void IActionState.Exit(float transitionTime)
 		{
 			// Stop enter
 			this.StopCoroutineIfExists(_enteringExiting);
