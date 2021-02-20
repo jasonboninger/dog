@@ -26,15 +26,17 @@ namespace Assets.Scripts.Dogs.ActionsSpecial
 			var walk = monoBehaviour.gameObject.AddComponent<UWalk>();
 			// Initialize action
 			walk.Initialize(controls);
-			// Set movement
-			walk.Movement = _movement;
+			// Set action
+			walk.Set(_movement, transitionTime: 0.1f, speedMaximum: 15, speedMinimum: 4, speedAcceleration: 50, distanceSlow: 1);
 			// Get plan
 			_plan = _actionPlanner.GetPlan();
 			// Set plan
 			_actionPlanner.PopulatePlan(_plan, walk);
+			// Subscribe to plan completed
+			_actionStateMachine.PlanCompleted_.AddListener(() => _actionStateMachine.CancelAction());
 		}
 
-		public bool IsValid(Dog state) => !state.Position.Equals(_movement.GetDestination(state)) || !_movement.ReachedDestination(state);
+		public bool IsValid(Dog state) => !state.Position.Equals(_movement.GetDestination(state)) && !_movement.ReachedDestination(state);
 
 		public float GetCost(Dog state) => 1 + Vector2.Distance(state.Position, _movement.GetDestination(state));
 

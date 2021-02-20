@@ -25,12 +25,14 @@ namespace Assets.Scripts.ActionManagement
 			}
 			set
 			{
+				// Get action
+				var action = Action;
 				// Set plan
 				_plan = value;
 				// Set plan index
 				_planIndex = 0;
-				// Check if executing
-				if (_executing)
+				// Check if executing and action changed
+				if (_executing && !Equals(Action, action))
 				{
 					// Set internal out transition
 					_transitionOutInternal = Action?.GetTransitionIn() ?? default;
@@ -43,11 +45,12 @@ namespace Assets.Scripts.ActionManagement
 			get
 			{
 				// Return action
-				return _plan.Steps.Count > _planIndex ? _plan.Steps[_planIndex].Action : null;
+				return _plan != null && _plan.Steps.Count > _planIndex ? _plan.Steps[_planIndex].Action : null;
 			}
 		}
 
 		private bool _executing;
+		private bool _cancel;
 		private TTransition? _transitionOutExternal;
 		private TTransition? _transitionOutInternal;
 
@@ -77,11 +80,19 @@ namespace Assets.Scripts.ActionManagement
 					// Execute action
 					yield return enumerator;
 				}
-				// Check if external out transition
-				if (_transitionOutExternal.HasValue)
+				// Check if external out transition or cancel
+				if (_transitionOutExternal.HasValue || _cancel)
 				{
+					// Set no internal out transition
+					_transitionOutInternal = null;
+					// Set plan index
+					_planIndex = 0;
+					// Set not cancel
+					_cancel = false;
+					// Set not executing
+					_executing = false;
 					// Stop loop
-					break;
+					yield break;
 				}
 				// Check if internal out transition
 				if (_transitionOutInternal.HasValue)
@@ -105,12 +116,12 @@ namespace Assets.Scripts.ActionManagement
 					transitionIn = Action?.GetTransitionIn() ?? default;
 				}
 			}
-			// Set no internal out transition
-			_transitionOutInternal = null;
-			// Set plan index
-			_planIndex = 0;
-			// Set not executing
-			_executing = false;
+		}
+
+		public void CancelAction()
+		{
+			// Set cancel
+			_cancel = true;
 		}
 
 		private Func<TTransition?> _GetTransitionOutWrapped(Func<TTransition?> getTransitionOut)
@@ -120,8 +131,8 @@ namespace Assets.Scripts.ActionManagement
 			{
 				// Set external out transition
 				_transitionOutExternal = getTransitionOut();
-				// Return external out transition or internal out transition
-				return _transitionOutExternal ?? _transitionOutInternal;
+				// Return external out transition or internal out transition or cancel
+				return _transitionOutExternal ?? _transitionOutInternal ?? (_cancel ? default(TTransition) : (TTransition?)null);
 			};
 		}
 	}
