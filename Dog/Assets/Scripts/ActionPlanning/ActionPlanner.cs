@@ -54,6 +54,25 @@ namespace Assets.Scripts.ActionPlanning
 			// Populate plan
 			_explorer.PopulatePlan(planConverted, state, goal);
 		}
+		public void PopulatePlan(IPlan<TState, TAction> plan, TAction action)
+		{
+			// Get converted plan
+			var planConverted = (Plan)plan;
+			// Reset plan
+			_ResetPlan(planConverted);
+			// Set success
+			planConverted.success = true;
+			// Get state
+			var state = _states.Get();
+			// Create step
+			var step = _steps.Get(state, state, action);
+			// Add step
+			planConverted.steps.Add(step);
+			// Set cycles
+			planConverted.cycles = 0;
+			// Set cost
+			planConverted.cost = 0;
+		}
 
 		public void ReleasePlan(IPlan<TState, TAction> plan)
 		{
