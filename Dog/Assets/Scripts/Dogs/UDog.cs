@@ -95,6 +95,14 @@ namespace Assets.Scripts.Dogs
 				action.Initialize(_controls);
 				// Add action
 				_actionPlanner.AddAction(action);
+				// Check if movement
+				if (action is IDogMovement movement)
+				{
+					// Create movement action
+					var actionMovement = new Move(action, _controls, movement);
+					// Add movement action
+					_actionPlanner.AddAction(actionMovement);
+				}
 			}
 		}
 

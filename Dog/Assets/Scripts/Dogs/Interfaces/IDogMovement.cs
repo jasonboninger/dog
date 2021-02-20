@@ -9,5 +9,6 @@ namespace Assets.Scripts.Dogs.Interfaces
 		Vector2 GetDestination(Dog state);
 
 		bool ReachedDestination();
+		bool ReachedDestination(Dog state);
 	}
 }

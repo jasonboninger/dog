@@ -34,9 +34,9 @@ namespace Assets.Scripts.Dogs.ActionsSpecial
 			_actionPlanner.PopulatePlan(_plan, walk);
 		}
 
-		public bool IsValid(Dog state) => true;
+		public bool IsValid(Dog state) => !state.Position.Equals(_movement.GetDestination(state)) || !_movement.ReachedDestination(state);
 
-		public float GetCost(Dog state) => Vector2.Distance(state.Position, _movement.GetDestination(state));
+		public float GetCost(Dog state) => 1 + Vector2.Distance(state.Position, _movement.GetDestination(state));
 
 		public void UpdateState(Dog state) => state.Position = _movement.GetDestination(state);
 
