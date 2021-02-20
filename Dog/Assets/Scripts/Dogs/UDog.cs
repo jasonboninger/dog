@@ -1,51 +1,52 @@
-﻿using Assets.Scripts.ActionPlanning;
+﻿using Assets.Scripts.ActionManagement;
+using Assets.Scripts.ActionPlanning;
 using Assets.Scripts.ActionPlanning.Interfaces;
-using Assets.Scripts.Dogs.Actions;
+using Assets.Scripts.Dogs.ActionsSpecial;
 using Assets.Scripts.Dogs.Goals;
 using Assets.Scripts.Dogs.Interfaces;
 using Assets.Scripts.Dogs.Models;
 using Assets.Scripts.Dogs.States;
-using System.Collections;
 using UnityEngine;
 
 namespace Assets.Scripts.Dogs
 {
 	[RequireComponent(typeof(Animator))]
 	[RequireComponent(typeof(UDogOwner))]
-	[RequireComponent(typeof(UDogActions))]
 	public class UDog : MonoBehaviour
 	{
 		[SerializeField] private Transform _actionsContainer = default;
 
-		private ActionPlanner<Dog, IDogAction> _planner;
+		private ActionPlanner<Dog, IDogAction> _actionPlanner;
+		private ActionStateMachine<Dog, IDogAction, float> _actionStateMachine;
 		private Dog _state;
-		private IPlan<Dog, IDogAction> _plan;
-		private int _step;
+		private IPlan<Dog, IDogAction> _planActive;
+		private IPlan<Dog, IDogAction> _planTest;
 		private Controls _controls;
 		private IGoal<Dog> _goal;
 		private UDogOwner _owner;
-		private UDogActions _actions;
 		private IDogAction _actionDefault;
 		private Vector2 _position;
 
 		protected void Awake()
 		{
-			// Set planner
-			_planner = new ActionPlanner<Dog, IDogAction>();
+			// Set action planner
+			_actionPlanner = new ActionPlanner<Dog, IDogAction>();
 			// Set state
-			_state = _planner.GetState();
+			_state = _actionPlanner.GetState();
 			_state.Position = new Vector2(transform.position.x, transform.position.z);
 			_state.Speed = new Vector2(0, 0);
-			// Set plan
-			_plan = _planner.GetPlan();
+			// Set active plan
+			_planActive = _actionPlanner.GetPlan();
+			// Set test plan
+			_planTest = _actionPlanner.GetPlan();
+			// Set action state machine
+			_actionStateMachine = new ActionStateMachine<Dog, IDogAction, float>();
 			// Set controls
 			_controls = new Controls(_state, transform, GetComponent<Animator>(), new Looker());
 			// Set goal
 			_goal = new GetLaserPoint();
 			// Set owner
 			_owner = GetComponent<UDogOwner>();
-			// Set actions
-			_actions = GetComponent<UDogActions>();
 			// Subscribe to click
 			_owner.Click_.AddListener(_SetLaserPointer);
 		}
@@ -54,8 +55,16 @@ namespace Assets.Scripts.Dogs
 		{
 			// Initialize actions
 			_InitializeActions();
+			// Set state
+			_SetState();
+			// Set plan
+			_SetPlan();
+			// Subscribe to plan completed
+			_actionStateMachine.PlanCompleted_.AddListener(() => _SetPlan());
+			// Get in transition
+			var transitionIn = _actionStateMachine.GetTransitionIn();
 			// Execute actions
-			StartCoroutine(_ExecuteActions());
+			StartCoroutine(_actionStateMachine.ExecuteAction(transitionIn, getTransitionOut: () => null));
 		}
 
 		protected void OnDestroy()
@@ -68,47 +77,24 @@ namespace Assets.Scripts.Dogs
 		{
 			// Set state
 			_SetState();
-			// Set action
-			_SetAction();
+			// Set plan
+			_SetPlan();
 		}
 
 		private void _InitializeActions()
 		{
 			// Set default action
-			_actionDefault = _actionsContainer.GetComponentInChildren<UIdle>();
-			// Initialize default action
-			_actionDefault.Initialize(_controls);
-			// Add actions
-			_planner.AddAction(_actionsContainer.GetComponentInChildren<UMove>());
-			// Initialize actions
-			for (int i = 0; i < _planner.Actions.Count; i++)
+			_actionDefault = new Idle();
+			// Get actions
+			var actions = _actionsContainer.GetComponentsInChildren<UDogAction>();
+			// Add and initialize actions
+			for (int i = 0; i < actions.Length; i++)
 			{
+				var action = actions[i];
 				// Initialize action
-				_planner.Actions[i].Initialize(_controls);
-			}
-		}
-
-		private IEnumerator _ExecuteActions()
-		{
-			// Wait for update
-			yield return null;
-			// Enter actions
-			_actions.Enter(_actions.GetTransitionTime());
-			// Loop forever
-			while (true)
-			{
-				// Execute actions
-				yield return _actions.Execute(() => false);
-				// Get action
-				var action = _GetAction();
-				// Get transition time
-				var transitionTime = action.GetTransitionTime();
-				// Exit actions
-				_actions.Exit(transitionTime);
-				// Set action
-				_actions.Action = action;
-				// Enter actions
-				_actions.Enter(transitionTime);
+				action.Initialize(_controls);
+				// Add action
+				_actionPlanner.AddAction(action);
 			}
 		}
 
@@ -124,36 +110,24 @@ namespace Assets.Scripts.Dogs
 			_position = position;
 		}
 
-		private IDogAction _GetAction()
+		private void _SetPlan()
 		{
-			// Increment step
-			_step++;
-			// Check if step exists
-			if (_step < _plan.Steps.Count)
+			// Set test plan
+			_actionPlanner.PopulatePlan(_planTest, _state, _goal);
+			// Check if test plan is not valid
+			if (!_planTest.Success || _planTest.Steps.Count == 0)
 			{
-				// Return action
-				return _plan.Steps[_step].Action;
+				// Set test plan
+				_actionPlanner.PopulatePlan(_planTest, _actionDefault);
 			}
-			// Populate plan
-			_planner.PopulatePlan(_plan, _state, _goal);
-			// Return action
-			return _plan.Success && _plan.Steps.Count > 0 ? _plan.Steps[0].Action : _actionDefault;
-		}
-
-		private void _SetAction()
-		{
-			// Populate plan
-			_planner.PopulatePlan(_plan, _state, _goal);
-			// Get action
-			var action = _plan.Success && _plan.Steps.Count > 0 ? _plan.Steps[0].Action : _actionDefault;
-			// Check if action changed
-			if (!action.Equals(_actions.Action))
-			{
-				// Set step
-				_step = 0;
-				// Set action
-				_actions.Action = action;
-			}
+			// Set plan
+			_actionStateMachine.Plan = _planTest;
+			// Get active plan
+			var planActive = _planActive;
+			// Set active plan
+			_planActive = _planTest;
+			// Set test plan
+			_planTest = planActive;
 		}
 
 		private void _SetLaserPointer(Vector3 position)

@@ -1,9 +1,6 @@
-﻿using Assets.Scripts.ActionManagement.Interfaces;
-using Assets.Scripts.ActionPlanning.Interfaces;
-using Assets.Scripts.Dogs.Interfaces;
+﻿using Assets.Scripts.Dogs.Interfaces;
 using Assets.Scripts.Dogs.Models;
 using Assets.Scripts.Dogs.States;
-using Assets.Scripts.Static;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -18,10 +15,8 @@ namespace Assets.Scripts.Dogs
 		protected Animator Animator { get; private set; }
 		protected Looker Looker { get; private set; }
 
-		private Coroutine _enteringExiting;
-
 		protected abstract void Initialize();
-		void IDogAction.Initialize(Controls controls)
+		public void Initialize(Controls controls)
 		{
 			// Set controls
 			Controls = controls;
@@ -37,37 +32,14 @@ namespace Assets.Scripts.Dogs
 			Initialize();
 		}
 
-		protected abstract bool IsValid(Dog state);
-		bool IAction<Dog>.IsValid(Dog state) => IsValid(state);
+		public abstract bool IsValid(Dog state);
 
-		protected abstract float GetCost(Dog state);
-		float IAction<Dog>.GetCost(Dog state) => GetCost(state);
+		public abstract float GetCost(Dog state);
 
-		protected abstract void UpdateState(Dog state);
-		void IAction<Dog>.UpdateState(Dog state) => UpdateState(state);
+		public abstract void UpdateState(Dog state);
 
-		protected abstract float GetTransitionTime();
-		float IActionState.GetTransitionTime() => GetTransitionTime();
-
-		protected abstract IEnumerator Enter(float transitionTime);
-		void IActionState.Enter(float transitionTime)
-		{
-			// Stop exit
-			this.StopCoroutineIfExists(_enteringExiting);
-			// Execute enter
-			_enteringExiting = StartCoroutine(Enter(transitionTime));
-		}
-
-		protected abstract IEnumerator Execute(Func<bool> cancelled);
-		IEnumerator IActionState.Execute(Func<bool> cancelled) => Execute(cancelled);
-
-		protected abstract IEnumerator Exit(float transitionTime);
-		void IActionState.Exit(float transitionTime)
-		{
-			// Stop enter
-			this.StopCoroutineIfExists(_enteringExiting);
-			// Execute exit
-			_enteringExiting = StartCoroutine(Exit(transitionTime));
-		}
+		public abstract float GetTransitionIn();
+		
+		public abstract IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut);
 	}
 }
