@@ -3,14 +3,11 @@ using System.Collections;
 
 namespace Assets.Scripts.ActionManagement.Interfaces
 {
-	public interface IActionState
+	public interface IActionState<TTransition>
+	where TTransition : struct
 	{
-		float GetTransitionTime();
+		TTransition GetTransitionIn();
 
-		void Enter(float transitionTime);
-
-		IEnumerator Execute(Func<bool> cancelled);
-
-		void Exit(float transitionTime);
+		IEnumerator ExecuteAction(TTransition transitionIn, Func<TTransition?> getTransitionOut);
 	}
 }
