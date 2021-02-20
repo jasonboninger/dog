@@ -15,6 +15,7 @@ namespace Assets.Scripts.Dogs
 	public class UDog : MonoBehaviour
 	{
 		[SerializeField] private Transform _actionsContainer = default;
+		[SerializeField] private Transform _actionsMovementContainer = default;
 
 		private ActionPlanner<Dog, IDogAction> _actionPlanner;
 		private ActionStateMachine<Dog, IDogAction, float> _actionStateMachine;
@@ -85,6 +86,15 @@ namespace Assets.Scripts.Dogs
 		{
 			// Set default action
 			_actionDefault = new Idle();
+			// Get movement actions
+			var actionsMovement = _actionsMovementContainer.GetComponentsInChildren<UDogActionMovement>();
+			// Run through movement actions
+			for (int i = 0; i < actionsMovement.Length; i++)
+			{
+				var actionMovement = actionsMovement[i];
+				// Initialize movement action
+				actionMovement.Initialize(_controls);
+			}
 			// Get actions
 			var actions = _actionsContainer.GetComponentsInChildren<UDogAction>();
 			// Add and initialize actions
@@ -95,11 +105,11 @@ namespace Assets.Scripts.Dogs
 				action.Initialize(_controls);
 				// Add action
 				_actionPlanner.AddAction(action);
-				// Check if movement
-				if (action is IDogMovement movement)
+				// Check if destination action
+				if (action is IDogActionDestination actionDestination)
 				{
 					// Create movement action
-					var actionMovement = new Move(action, _controls, movement);
+					var actionMovement = new Move(action.gameObject, actionsMovement, actionDestination);
 					// Add movement action
 					_actionPlanner.AddAction(actionMovement);
 				}

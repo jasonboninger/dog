@@ -8,11 +8,9 @@ using UnityEngine;
 
 namespace Assets.Scripts.Dogs.ActionsMovement
 {
-	public class UWalk : UDogAction
+	public class UWalk : UDogActionMovement
 	{
 		private static readonly Vector2 _zero = new Vector2(0, 0);
-
-		public IDogMovement Movement { get; set; }
 
 		[SerializeField] private float _transitionTime = default;
 		[SerializeField] private float _speedMaximum = default;
@@ -20,16 +18,38 @@ namespace Assets.Scripts.Dogs.ActionsMovement
 		[SerializeField] private float _speedAcceleration = default;
 		[SerializeField] private float _distanceSlow = default;
 
-		private Coroutine _enteringExiting;
+		private IDogActionDestination _actionDestination;
 		private AnimatorLayerWeight _walk;
 		private AnimatorParameterFloat _speed;
+		private Coroutine _enteringExiting;
 
 		protected override void Initialize()
 		{
 			// Set walk
-			_walk = new AnimatorLayerWeight(Animator, "Core_Walk");
+			_walk = _walk ?? new AnimatorLayerWeight(Animator, "Core_Walk");
 			// Set speed
-			_speed = new AnimatorParameterFloat(Animator, "Core_Walk---Speed");
+			_speed = _speed ?? new AnimatorParameterFloat(Animator, "Core_Walk---Speed");
+		}
+
+		public override IDogActionMovement Create(GameObject gameObject, IDogActionDestination actionDestination)
+		{
+			// Create walk
+			var walk = gameObject.AddComponent<UWalk>();
+			// Set serialize fields
+			walk._transitionTime = _transitionTime;
+			walk._speedMaximum = _speedMaximum;
+			walk._speedMinimum = _speedMinimum;
+			walk._speedAcceleration = _speedAcceleration;
+			walk._distanceSlow = _distanceSlow;
+			// Set destination action
+			walk._actionDestination = actionDestination;
+			// Set animators
+			walk._walk = _walk;
+			walk._speed = _speed;
+			// Initialize walk
+			walk.Initialize(Controls);
+			// Return walk
+			return walk;
 		}
 
 		public override bool IsValid(Dog state) => throw new NotImplementedException();
@@ -62,7 +82,7 @@ namespace Assets.Scripts.Dogs.ActionsMovement
 				// Get position
 				var position = new Vector2(Transform.position.x, Transform.position.z);
 				// Get destination
-				var destination = Movement.GetDestination();
+				var destination = _actionDestination.GetPosition();
 				// Get direction
 				var direction = destination - position;
 				// Get distance
@@ -84,10 +104,10 @@ namespace Assets.Scripts.Dogs.ActionsMovement
 					Transform.rotation = Quaternion.LookRotation(new Vector3(direction.x, Transform.position.y, direction.y));
 				}
 				// Check if at destination or destination reached
-				if (position.Equals(destination) || Movement.ReachedDestination())
+				if (position.Equals(destination) || _actionDestination.IsReached())
 				{
 					// Destination reached
-					yield break;
+					break;
 				}
 				// Wait a frame
 				yield return null;
