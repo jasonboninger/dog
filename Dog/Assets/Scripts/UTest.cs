@@ -22,10 +22,6 @@ namespace Assets.Scripts
 			{
 				health = enemy.health;
 			}
-			public void Set(int health)
-			{
-				this.health = health;
-			}
 		}
 
 		private class Weapon
@@ -35,10 +31,6 @@ namespace Assets.Scripts
 			public void Set(Weapon weapon)
 			{
 				ammunition = weapon.ammunition;
-			}
-			public void Set(int ammunition)
-			{
-				this.ammunition = ammunition;
 			}
 		}
 
@@ -59,12 +51,6 @@ namespace Assets.Scripts
 				enemy.Set(state.enemy);
 				weapon.Set(state.weapon);
 				posture = state.posture;
-			}
-			public void Set(int enemyHealth, int weaponAmmunition, EPosture posture)
-			{
-				enemy.Set(enemyHealth);
-				weapon.Set(weaponAmmunition);
-				this.posture = posture;
 			}
 
 			public void Reset() { /* Required for interface */ }
@@ -138,7 +124,7 @@ namespace Assets.Scripts
 			public float IsAchieved(State state) => state.enemy.health <= 0 ? 1 : 0;
 		}
 
-		private readonly ActionPlanner<State, IAction<State>> _actionPlanner = new ActionPlanner<State, IAction<State>>();
+		private readonly ActionPlanner<State, Action> _actionPlanner = new ActionPlanner<State, Action>();
 		private readonly Goal _goal = new Goal();
 
 		protected void Awake()
@@ -157,12 +143,10 @@ namespace Assets.Scripts
 		private void _PlanActions()
 		{
 			var state = _actionPlanner.GetState();
-			state.Set
-				(
-					enemyHealth: 10,
-					weaponAmmunition: 0,
-					posture: EPosture.Laying
-				);
+			state.enemy.health = 10;
+			state.weapon.ammunition = 0;
+			state.posture = EPosture.Laying;
+			
 			var plan = _actionPlanner.GetPlan();
 			_actionPlanner.PopulatePlan(plan, state, _goal);
 
