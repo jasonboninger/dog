@@ -8,7 +8,7 @@ namespace Assets.Scripts.Static
 	{
 		private const float _TIME_ZERO = 0.01f;
 
-		public static void StopCoroutineIfExists(this MonoBehaviour monoBehaviour, Coroutine coroutine)
+		public static void StopCoroutineIfExists(this MonoBehaviour monoBehaviour, in Coroutine coroutine)
 		{
 			// Check if coroutine exists
 			if (coroutine != null)
@@ -16,6 +16,14 @@ namespace Assets.Scripts.Static
 				// Stop coroutine
 				monoBehaviour.StopCoroutine(coroutine);
 			}
+		}
+
+		public static void StopCoroutineIfExistsAndReplace(this MonoBehaviour monoBehaviour, ref Coroutine coroutine, in Coroutine replacement)
+		{
+			// Stop coroutine if exists
+			monoBehaviour.StopCoroutineIfExists(coroutine);
+			// Set coroutine to replacement
+			coroutine = replacement;
 		}
 
 		public static IEnumerator ExecuteInParallel
