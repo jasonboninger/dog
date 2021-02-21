@@ -67,8 +67,7 @@ namespace Assets.Scripts.ActionPlanning
 					TState state,
 					TAction action,
 					float costKnown,
-					float costEstimated,
-					float achieved
+					float costEstimated
 				)
 				{
 					// Get action point
@@ -79,7 +78,6 @@ namespace Assets.Scripts.ActionPlanning
 					actionPoint.action = action;
 					actionPoint.costKnown = costKnown;
 					actionPoint.costEstimated = costEstimated;
-					actionPoint.achieved = achieved;
 					// Add action point
 					_cache.Add(actionPoint);
 					// Return action point
@@ -110,11 +108,9 @@ namespace Assets.Scripts.ActionPlanning
 				public TAction action;
 				public float costKnown;
 				public float costEstimated;
-				public float achieved;
 			}
 
 			private IGoal<TState> _goal;
-			private float _costLimit;
 
 			private readonly int _cyclesLimit;
 			private readonly Steps _steps;
@@ -142,20 +138,16 @@ namespace Assets.Scripts.ActionPlanning
 				_ResetCache();
 				// Set goal
 				_goal = goal;
-				// Get effort cost
-				var costEffort = goal.CostEffort;
-				// Set cost limit
-				_costLimit = goal.CostLimit;
-				// Initialize goal action point
-				var actionPointGoal = _InitializeActionPointGoal();
 				// Initialize action points
 				_InitializeActionPoints(state);
 				// Get action points
 				var actionPoints = _actionPoints;
 				// Create cycles
 				var cycles = 0;
+				// Get cycles limit
+				var cyclesLimit = _cyclesLimit;
 				// Search action points
-				while (actionPoints.Count > 0)
+				while (true)
 				{
 					// Increment cycles
 					cycles++;
@@ -163,68 +155,45 @@ namespace Assets.Scripts.ActionPlanning
 					var actionPoint = actionPoints[0];
 					// Remove action point
 					actionPoints.RemoveAt(0);
-					// Get achieved
-					var achieved = actionPoint.achieved;
-					// Check if achieved
-					if (achieved > 0)
+					// Check if goal is achieved
+					if (goal.IsAchieved(actionPoint.state))
 					{
-						// Check if better than goal action point
-						if (actionPointGoal == null || achieved > actionPointGoal.achieved)
-						{
-							// Set goal action point
-							actionPointGoal = actionPoint;
-							// Check if best goal action point
-							if (achieved >= 1)
-							{
-								// Stop loop
-								break;
-							}
-						}
-						// Continue loop
-						continue;
-					}
-					// Check if goal action point exists and effort cost is reached
-					if (actionPointGoal != null && actionPoint.costKnown > costEffort)
-					{
-						// Stop loop
-						break;
-					}
-					// Check if cycles limit is reached
-					if (cycles >= _cyclesLimit)
-					{
+						// Set success
+						plan.outcome = EPlanningOutcome.Success;
+						// Populate steps
+						_PopulateSteps(plan, actionPoint);
+						// Set cycles
+						plan.cycles = cycles;
+						// Set cost
+						plan.cost = actionPoint.costKnown;
 						// Stop loop
 						break;
 					}
 					// Add action points
 					_AddActionPoints(actionPoint);
-				}
-				// Check if goal action point does not exist
-				if (actionPointGoal == null)
-				{
-					// Set outcome
-					plan.outcome = actionPoints.Count > 0 ? EPlanningOutcome.CyclesLimitReached : EPlanningOutcome.CostLimitReached;
-					// Set cycles
-					plan.cycles = cycles;
-				}
-				else
-				{
-					// Set success
-					plan.outcome = EPlanningOutcome.Success;
-					// Populate steps
-					_PopulateSteps(plan, actionPointGoal);
-					// Set cycles
-					plan.cycles = cycles;
-					// Set cost
-					plan.cost = actionPointGoal.costKnown;
+					// Check if no action points
+					if (actionPoints.Count == 0)
+					{
+						// Set outcome
+						plan.outcome = EPlanningOutcome.ValidActionsDepleted;
+						// Set cycles
+						plan.cycles = cycles;
+						// Stop loop
+						break;
+					}
+					// Check if cycles limit is reached
+					if (cycles >= cyclesLimit)
+					{
+						// Set outcome
+						plan.outcome = EPlanningOutcome.CyclesLimitReached;
+						// Set cycles
+						plan.cycles = cycles;
+						// Stop loop
+						break;
+					}
 				}
 				// Reset cache
 				_ResetCache();
-			}
-
-			private static ActionPoint _InitializeActionPointGoal()
-			{
-				// Return no action point
-				return null;
 			}
 
 			private void _InitializeActionPoints(TState state)
@@ -236,8 +205,7 @@ namespace Assets.Scripts.ActionPlanning
 						state,
 						action: default,
 						costKnown: 0,
-						costEstimated: 0,
-						achieved: _goal.IsAchieved(state)
+						costEstimated: 0
 					);
 				// Add action point
 				_actionPoints.Add(actionPoint);
@@ -269,22 +237,14 @@ namespace Assets.Scripts.ActionPlanning
 				}
 				// Get known cost
 				var costKnown = previous.costKnown + action.GetCost(state);
-				// Check if known cost is greater than cost limit
-				if (costKnown > _costLimit)
-				{
-					// Action is too expensive
-					return;
-				}
 				// Get new state
 				var stateNew = _statesCache.GetAndCache(state);
 				// Update new state
 				action.UpdateState(stateNew);
 				// Get estimated cost
 				var costEstimated = costKnown + _goal.EstimateProximity(stateNew);
-				// Get achieved
-				var achieved = _goal.IsAchieved(stateNew);
 				// Get action point
-				var actionPoint = _actionPointsCache.GetAndCache(previous, stateNew, action, costKnown, costEstimated, achieved);
+				var actionPoint = _actionPointsCache.GetAndCache(previous, stateNew, action, costKnown, costEstimated);
 				// Get action points
 				var actionPoints = _actionPoints;
 				// Get count

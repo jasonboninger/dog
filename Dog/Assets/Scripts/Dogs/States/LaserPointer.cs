@@ -7,12 +7,16 @@ namespace Assets.Scripts.Dogs.States
 	{
 		public bool On { get; set; }
 		public bool Visible { get; set; }
+		public bool Caught { get; set; }
+		public bool Found { get; set; }
 		public Vector2 Position { get; set; }
 
 		public void Reset()
 		{
 			On = false;
 			Visible = false;
+			Caught = false;
+			Found = false;
 			Position = default;
 		}
 
@@ -20,6 +24,8 @@ namespace Assets.Scripts.Dogs.States
 		{
 			On = state.On;
 			Visible = state.Visible;
+			Caught = state.Caught;
+			Found = state.Found;
 			Position = state.Position;
 		}
 	}

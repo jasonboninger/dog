@@ -19,7 +19,7 @@ namespace Assets.Scripts.Dogs.Actions
 
 		public override float GetCost(Dog state) => 1;
 
-		public override void UpdateState(Dog state) => state.LaserPointer.On = false;
+		public override void UpdateState(Dog state) => state.LaserPointer.Caught = true;
 
 		public bool IsTraversable() => IsTraversable(State);
 		public bool IsTraversable(Dog state) => state.LaserPointer.On && state.LaserPointer.Visible;

@@ -116,12 +116,9 @@ namespace Assets.Scripts
 
 		private class Goal : IGoal<State>
 		{
-			public float CostEffort => 0;
-			public float CostLimit => 100;
-
+			public bool IsAchieved(State state) => state.enemy.health <= 0;
+			
 			public float EstimateProximity(State state) => state.enemy.health * 3;
-
-			public float IsAchieved(State state) => state.enemy.health <= 0 ? 1 : 0;
 		}
 
 		[SerializeField] private int _cyclesLimit = default;

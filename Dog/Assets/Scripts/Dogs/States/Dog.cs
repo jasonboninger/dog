@@ -7,6 +7,7 @@ namespace Assets.Scripts.Dogs.States
 	{
 		public Vector2 Position { get; set; }
 		public Vector2 Speed { get; set; }
+		public bool Chilled { get; set; }
 
 		public Owner Owner { get; } = new Owner();
 		public LaserPointer LaserPointer { get; } = new LaserPointer();
@@ -15,6 +16,7 @@ namespace Assets.Scripts.Dogs.States
 		{
 			Position = default;
 			Speed = default;
+			Chilled = false;
 			Owner.Reset();
 			LaserPointer.Reset();
 		}
@@ -23,6 +25,7 @@ namespace Assets.Scripts.Dogs.States
 		{
 			Position = state.Position;
 			Speed = state.Speed;
+			Chilled = state.Chilled;
 			Owner.Set(state.Owner);
 			LaserPointer.Set(state.LaserPointer);
 		}

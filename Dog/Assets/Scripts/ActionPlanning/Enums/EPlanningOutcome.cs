@@ -4,7 +4,7 @@
 	{
 		NotPlanned,
 		Success,
-		CostLimitReached,
+		ValidActionsDepleted,
 		CyclesLimitReached,
 	}
 }

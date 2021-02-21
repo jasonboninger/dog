@@ -2,10 +2,7 @@
 {
 	public interface IGoal<in TState>
 	{
-		float CostEffort { get; }
-		float CostLimit { get; }
-
-		float IsAchieved(TState state);
+		bool IsAchieved(TState state);
 
 		float EstimateProximity(TState state);
 	}
