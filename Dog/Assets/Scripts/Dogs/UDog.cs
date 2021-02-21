@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.ActionManagement;
 using Assets.Scripts.ActionPlanning;
+using Assets.Scripts.ActionPlanning.Enums;
 using Assets.Scripts.ActionPlanning.Interfaces;
 using Assets.Scripts.Dogs.ActionsSpecial;
 using Assets.Scripts.Dogs.Goals;
@@ -137,7 +138,7 @@ namespace Assets.Scripts.Dogs
 			// Set test plan
 			_actionPlanner.PopulatePlan(_planTest, _state, _goal);
 			// Check if test plan is not valid
-			if (!_planTest.Success || _planTest.Steps.Count == 0)
+			if (_planTest.Outcome != EPlanningOutcome.Success || _planTest.Steps.Count == 0)
 			{
 				// Set test plan
 				_actionPlanner.PopulatePlan(_planTest, _actionDefault);

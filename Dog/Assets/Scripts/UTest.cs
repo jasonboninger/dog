@@ -117,18 +117,23 @@ namespace Assets.Scripts
 		private class Goal : IGoal<State>
 		{
 			public float CostEffort => 0;
-			public float CostLimit => 200;
+			public float CostLimit => 100;
 
 			public float EstimateProximity(State state) => state.enemy.health * 3;
 
 			public float IsAchieved(State state) => state.enemy.health <= 0 ? 1 : 0;
 		}
 
-		private readonly ActionPlanner<State, Action> _actionPlanner = new ActionPlanner<State, Action>();
-		private readonly Goal _goal = new Goal();
+		[SerializeField] private int _cyclesLimit = default;
+		[SerializeField] private int _startingHealth = default;
+
+		private ActionPlanner<State, Action> _actionPlanner;
+		private Goal _goal;
 
 		protected void Awake()
 		{
+			_actionPlanner = new ActionPlanner<State, Action>(_cyclesLimit);
+			_goal = new Goal();
 			_actionPlanner.AddAction(new Reload());
 			_actionPlanner.AddAction(new Fire());
 			_actionPlanner.AddAction(new GetUp());
@@ -143,7 +148,7 @@ namespace Assets.Scripts
 		private void _PlanActions()
 		{
 			var state = _actionPlanner.GetState();
-			state.enemy.health = 10;
+			state.enemy.health = _startingHealth;
 			state.weapon.ammunition = 0;
 			state.posture = EPosture.Laying;
 			
@@ -152,7 +157,7 @@ namespace Assets.Scripts
 
 
 
-			Debug.Log("Success: " + plan.Success);
+			Debug.Log("Outcome: " + plan.Outcome);
 			Debug.Log("Cycles: " + plan.Cycles);
 			Debug.Log("Cost: " + plan.Cost);
 			Debug.Log("Actions: " + string.Join(", ", plan.Steps.Select(step => step.Action.GetType().Name)));

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.ActionPlanning.Interfaces;
+﻿using Assets.Scripts.ActionPlanning.Enums;
+using Assets.Scripts.ActionPlanning.Interfaces;
 using Assets.Scripts.Utilities;
 using System.Collections.Generic;
 
@@ -17,14 +18,14 @@ namespace Assets.Scripts.ActionPlanning
 
 		private readonly States _states = new States();
 
-		public ActionPlanner()
+		public ActionPlanner(int cyclesLimit = 1000)
 		{
 			// Set steps
 			_steps = new Steps(_states);
 			// Set plans
 			_plans = new Reusable<Plan>(_ResetPlan);
 			// Set explorer
-			_explorer = new Explorer(_steps, _states, _actions);
+			_explorer = new Explorer(cyclesLimit, _steps, _states, _actions);
 		}
 
 		public TState GetState()
@@ -60,8 +61,8 @@ namespace Assets.Scripts.ActionPlanning
 			var planConverted = (Plan)plan;
 			// Reset plan
 			_ResetPlan(planConverted);
-			// Set success
-			planConverted.success = true;
+			// Set outcome
+			planConverted.outcome = EPlanningOutcome.Success;
 			// Get state
 			var state = _states.Get();
 			// Create step
@@ -94,8 +95,8 @@ namespace Assets.Scripts.ActionPlanning
 
 		private void _ResetPlan(Plan plan)
 		{
-			// Clear success
-			plan.success = false;
+			// Set outcome
+			plan.outcome = EPlanningOutcome.NotPlanned;
 			// Get reusable steps
 			var stepsReusable = _steps;
 			// Get steps

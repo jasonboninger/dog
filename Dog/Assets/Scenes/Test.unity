@@ -327,6 +327,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc73c75e53a697a40a7ab40e174c04ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _cyclesLimit: 1000
+  _startingHealth: 10
 --- !u!4 &1178864582
 Transform:
   m_ObjectHideFlags: 0

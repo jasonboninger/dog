@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.ActionPlanning.Interfaces;
+﻿using Assets.Scripts.ActionPlanning.Enums;
+using Assets.Scripts.ActionPlanning.Interfaces;
 using System.Collections.Generic;
 
 namespace Assets.Scripts.ActionPlanning
@@ -7,8 +8,8 @@ namespace Assets.Scripts.ActionPlanning
 	{
 		private class Plan : IPlan<TState, TAction>
 		{
-			public bool success = false;
-			bool IPlan<TState, TAction>.Success => success;
+			public EPlanningOutcome outcome = EPlanningOutcome.NotPlanned;
+			EPlanningOutcome IPlan<TState, TAction>.Outcome => outcome;
 
 			public readonly List<Step> steps = new List<Step>();
 			IReadOnlyList<IStep<TState, TAction>> IPlan<TState, TAction>.Steps => steps;

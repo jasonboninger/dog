@@ -1,6 +1,6 @@
-﻿using Assets.Scripts.ActionPlanning.Interfaces;
+﻿using Assets.Scripts.ActionPlanning.Enums;
+using Assets.Scripts.ActionPlanning.Interfaces;
 using Assets.Scripts.Utilities;
-using System;
 using System.Collections.Generic;
 
 namespace Assets.Scripts.ActionPlanning
@@ -116,6 +116,7 @@ namespace Assets.Scripts.ActionPlanning
 			private IGoal<TState> _goal;
 			private float _costLimit;
 
+			private readonly int _cyclesLimit;
 			private readonly Steps _steps;
 			private readonly StatesCache _statesCache;
 			private readonly IReadOnlyList<TAction> _actions;
@@ -123,8 +124,10 @@ namespace Assets.Scripts.ActionPlanning
 			private readonly ActionPointsCache _actionPointsCache = new ActionPointsCache();
 			private readonly List<ActionPoint> _actionPoints = new List<ActionPoint>();
 
-			public Explorer(Steps steps, States states, IReadOnlyList<TAction> actions)
+			public Explorer(int cyclesLimit, Steps steps, States states, IReadOnlyList<TAction> actions)
 			{
+				// Set cycles limit
+				_cyclesLimit = cyclesLimit;
 				// Set steps
 				_steps = steps;
 				// Set states cache
@@ -186,14 +189,27 @@ namespace Assets.Scripts.ActionPlanning
 						// Stop loop
 						break;
 					}
+					// Check if cycles limit is reached
+					if (cycles >= _cyclesLimit)
+					{
+						// Stop loop
+						break;
+					}
 					// Add action points
 					_AddActionPoints(actionPoint);
 				}
-				// Check if goal action point exists
-				if (actionPointGoal != null)
+				// Check if goal action point does not exist
+				if (actionPointGoal == null)
+				{
+					// Set outcome
+					plan.outcome = actionPoints.Count > 0 ? EPlanningOutcome.CyclesLimitReached : EPlanningOutcome.CostLimitReached;
+					// Set cycles
+					plan.cycles = cycles;
+				}
+				else
 				{
 					// Set success
-					plan.success = true;
+					plan.outcome = EPlanningOutcome.Success;
 					// Populate steps
 					_PopulateSteps(plan, actionPointGoal);
 					// Set cycles
