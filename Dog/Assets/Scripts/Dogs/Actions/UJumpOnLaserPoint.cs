@@ -9,6 +9,9 @@ namespace Assets.Scripts.Dogs.Actions
 	public class UJumpOnLaserPoint : UDogAction, IDogActionDestination
 	{
 		[SerializeField] private float _transitionTime = 0;
+		[SerializeField] private bool _slowOnApproach = true;
+
+		public bool SlowOnApproach => _slowOnApproach;
 
 		protected override void Initialize() { }
 

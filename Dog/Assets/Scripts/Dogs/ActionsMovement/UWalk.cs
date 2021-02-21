@@ -89,8 +89,12 @@ namespace Assets.Scripts.Dogs.ActionsMovement
 				var distance = direction.magnitude;
 				// Get speed
 				var speed = Mathf.Clamp(_speed.Value + _speedAcceleration * deltaTime, _speedMinimum, _speedMaximum);
-				// Interpolate speed
-				speed = Mathf.Lerp(_speedMinimum, speed, distance / _distanceSlow);
+				// Check if slow on approach
+				if (_actionDestination.SlowOnApproach)
+				{
+					// Interpolate speed
+					speed = Mathf.Lerp(_speedMinimum, speed, distance / _distanceSlow);
+				}
 				// Set speed
 				_speed.Value = speed;
 				// Move position
