@@ -48,8 +48,10 @@ namespace Assets.Scripts.Dogs
 			_goal = new GetLaserPoint();
 			// Set owner
 			_owner = GetComponent<UDogOwner>();
+			// Subscribe to point
+			_owner.Point_.AddListener(_AimLaserPointer);
 			// Subscribe to click
-			_owner.Click_.AddListener(_SetLaserPointer);
+			_owner.Click_.AddListener(_ToggleLaserPointer);
 		}
 
 		protected void Start()
@@ -70,8 +72,10 @@ namespace Assets.Scripts.Dogs
 
 		protected void OnDestroy()
 		{
+			// Unsubscribe from point
+			_owner.Point_.RemoveListener(_AimLaserPointer);
 			// Unsubscribe from click
-			_owner.Click_.RemoveListener(_SetLaserPointer);
+			_owner.Click_.RemoveListener(_ToggleLaserPointer);
 		}
 
 		protected void Update()
@@ -148,11 +152,27 @@ namespace Assets.Scripts.Dogs
 			_planTest = planActive;
 		}
 
-		private void _SetLaserPointer(Vector3 position)
+		private void _AimLaserPointer(Vector3? position)
 		{
-			// Set laser pointer
-			_state.LaserPointer.On = true;
-			_state.LaserPointer.Position = new Vector2(position.x, position.z);
+			// Check if position exists
+			if (position.HasValue)
+			{
+				// Set laser pointer visible
+				_state.LaserPointer.Visible = true;
+				// Set laser pointer position
+				_state.LaserPointer.Position = new Vector2(position.Value.x, position.Value.z);
+			}
+			else
+			{
+				// Set laser pointer not visible
+				_state.LaserPointer.Visible = false;
+			}
+		}
+
+		private void _ToggleLaserPointer()
+		{
+			// Set laser pointer on/off
+			_state.LaserPointer.On = !_state.LaserPointer.On;
 		}
 	}
 }

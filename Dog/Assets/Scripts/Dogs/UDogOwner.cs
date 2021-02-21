@@ -6,24 +6,36 @@ namespace Assets.Scripts.Dogs
 {
 	public class UDogOwner : MonoBehaviour
 	{
-		private readonly BwEvent<Vector3> _click_ = new BwEvent<Vector3>();
-		public IBwEvent<Vector3> Click_ => _click_;
+		private readonly BwEvent _click_ = new BwEvent();
+		public IBwEvent Click_ => _click_;
 
-		private Vector2 _point;
+		private readonly BwEvent<Vector3?> _point_ = new BwEvent<Vector3?>();
+		public IBwEvent<Vector3?> Point_ => _point_;
 
 		public void Point(InputAction.CallbackContext point)
 		{
-			// Set point
-			_point = point.ReadValue<Vector2>();
+			// Get position
+			var position = point.ReadValue<Vector2>();
+			// Check if raycast hits
+			if (Physics.Raycast(Camera.main.ScreenPointToRay(position), out var hit))
+			{
+				// Emit point
+				_point_.Invoke(hit.point);
+			}
+			else
+			{
+				// Emit no point
+				_point_.Invoke(null);
+			}
 		}
 
 		public void Click(InputAction.CallbackContext click)
 		{
-			// Check if click and raycast
-			if (click.performed && click.control.IsPressed() && Physics.Raycast(Camera.main.ScreenPointToRay(_point), out var hit))
+			// Check if pressed
+			if (click.control.IsPressed())
 			{
 				// Emit click
-				_click_.Invoke(hit.point);
+				_click_.Invoke();
 			}
 		}
 	}

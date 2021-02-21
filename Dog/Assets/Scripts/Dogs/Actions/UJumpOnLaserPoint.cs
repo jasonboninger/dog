@@ -15,11 +15,14 @@ namespace Assets.Scripts.Dogs.Actions
 
 		protected override void Initialize() { }
 
-		public override bool IsValid(Dog state) => state.LaserPointer.On && state.Position.Equals(state.LaserPointer.Position);
+		public override bool IsValid(Dog state) => IsTraversable(state) && state.Position.Equals(state.LaserPointer.Position);
 
 		public override float GetCost(Dog state) => 1;
 
 		public override void UpdateState(Dog state) => state.LaserPointer.On = false;
+
+		public bool IsTraversable() => IsTraversable(State);
+		public bool IsTraversable(Dog state) => state.LaserPointer.On && state.LaserPointer.Visible;
 
 		public Vector2 GetPosition() => GetPosition(State);
 		public Vector2 GetPosition(Dog state) => state.LaserPointer.Position;
@@ -33,10 +36,8 @@ namespace Assets.Scripts.Dogs.Actions
 		{
 			// Log jump
 			Debug.Log("JUMPED FOR IT!");
-			// Set laser pointer off
-			State.LaserPointer.On = false;
-			// Return enumerator
-			yield break;
+			// Wait a second
+			yield return new WaitForSeconds(1);
 		}
 	}
 }

@@ -7,6 +7,9 @@ namespace Assets.Scripts.Dogs.Interfaces
 	{
 		bool SlowOnApproach { get; }
 
+		bool IsTraversable();
+		bool IsTraversable(Dog state);
+		
 		Vector2 GetPosition();
 		Vector2 GetPosition(Dog state);
 

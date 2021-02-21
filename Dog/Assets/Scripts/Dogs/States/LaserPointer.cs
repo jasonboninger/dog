@@ -5,21 +5,21 @@ namespace Assets.Scripts.Dogs.States
 {
 	public class LaserPointer : IState<LaserPointer>
 	{
-		public bool InHand { get; set; }
 		public bool On { get; set; }
+		public bool Visible { get; set; }
 		public Vector2 Position { get; set; }
 
 		public void Reset()
 		{
-			InHand = false;
 			On = false;
+			Visible = false;
 			Position = default;
 		}
 
 		public void Set(LaserPointer state)
 		{
-			InHand = state.InHand;
 			On = state.On;
+			Visible = state.Visible;
 			Position = state.Position;
 		}
 	}

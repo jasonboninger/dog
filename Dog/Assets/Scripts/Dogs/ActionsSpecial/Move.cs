@@ -41,7 +41,7 @@ namespace Assets.Scripts.Dogs.ActionsSpecial
 			_actionStateMachine.PlanCompleted_.AddListener(() => _actionStateMachine.CancelAction());
 		}
 
-		public bool IsValid(Dog state) => !state.Position.Equals(_actionDestination.GetPosition(state)) && !_actionDestination.IsReached(state);
+		public bool IsValid(Dog state) => _actionDestination.IsTraversable(state) && !_actionDestination.IsReached(state);
 
 		public float GetCost(Dog state) => 1 + Vector2.Distance(state.Position, _actionDestination.GetPosition(state));
 

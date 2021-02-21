@@ -77,6 +77,12 @@ namespace Assets.Scripts.Dogs.ActionsMovement
 					// Stop loop
 					break;
 				}
+				// Check if destination not traversable
+				if (!_actionDestination.IsTraversable())
+				{
+					// No destination
+					break;
+				}
 				// Get delta time
 				var deltaTime = Time.deltaTime;
 				// Get position
