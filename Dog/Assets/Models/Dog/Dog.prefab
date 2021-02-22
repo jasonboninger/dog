@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _transitionTime: 0
+  _slowOnApproach: 1
 --- !u!1 &3308157730161209653
 GameObject:
   m_ObjectHideFlags: 0
@@ -88,10 +89,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _transitionTime: 0.1
-  _speedMaximum: 15
-  _speedMinimum: 4
-  _speedAcceleration: 50
-  _distanceSlow: 1
+  _speedMaximum: 2.25
+  _speedMinimum: 0.6
+  _speedAcceleration: 7.5
+  _distanceSlow: 0.15
 --- !u!1 &5093220736839779700
 GameObject:
   m_ObjectHideFlags: 0
