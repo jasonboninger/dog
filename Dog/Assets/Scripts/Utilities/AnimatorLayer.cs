@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.Utilities
 {
-	public class AnimatorLayerWeight
+	public class AnimatorLayer
 	{
 		public float Weight { get => _animator.GetLayerWeight(_layer); set => _animator.SetLayerWeight(_layer, value); }
 
@@ -11,11 +11,15 @@ namespace Assets.Scripts.Utilities
 		private readonly Animator _animator;
 		private readonly int _layer;
 
-		public AnimatorLayerWeight(Animator animator, string name)
+		public AnimatorLayer(Animator animator, string name)
 		{
 			_animator = animator;
 			_layer = animator.GetLayerIndex(name);
 			Name = name;
 		}
+
+		public AnimatorStateInfo GetCurrentAnimatorStateInfo() => _animator.GetCurrentAnimatorStateInfo(_layer);
+
+		public void Play(string stateName, float normalizedTime) => _animator.Play(stateName, _layer, normalizedTime);
 	}
 }

@@ -19,16 +19,16 @@ namespace Assets.Scripts.Dogs.ActionsMovement
 		[SerializeField] private float _distanceSlow = default;
 
 		private IDogActionDestination _actionDestination;
-		private AnimatorLayerWeight _walk;
+		private AnimatorLayer _walk;
 		private AnimatorParameterFloat _speed;
 		private Coroutine _enteringExiting;
 
 		protected override void Initialize()
 		{
 			// Set walk
-			_walk = _walk ?? new AnimatorLayerWeight(Animator, "Core_Walk");
+			_walk = new AnimatorLayer(Animator, "Core_Walk");
 			// Set speed
-			_speed = _speed ?? new AnimatorParameterFloat(Animator, "Core_Walk---Speed");
+			_speed = new AnimatorParameterFloat(Animator, "Core_Walk---Speed");
 		}
 
 		public override IDogActionMovement Create(GameObject gameObject, IDogActionDestination actionDestination)

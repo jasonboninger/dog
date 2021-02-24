@@ -18,7 +18,7 @@ namespace Assets.Scripts
 		private AnimatorParameterBool _walking;
 		private AnimatorParameterFloat _speed;
 		private AnimatorParameterTrigger _ready;
-		private AnimatorLayerWeight _tailHappy;
+		private AnimatorLayer _tailHappy;
 		private int _base;
 		private float _speedCurrent;
 		private Vector2 _point;
@@ -35,7 +35,7 @@ namespace Assets.Scripts
 			_walking = new AnimatorParameterBool(_animator, "Walking");
 			_speed = new AnimatorParameterFloat(_animator, "Speed");
 			_ready = new AnimatorParameterTrigger(_animator, "Ready");
-			_tailHappy = new AnimatorLayerWeight(_animator, "TailHappy");
+			_tailHappy = new AnimatorLayer(_animator, "TailHappy");
 			_base = _animator.GetLayerIndex("Base");
 		}
 

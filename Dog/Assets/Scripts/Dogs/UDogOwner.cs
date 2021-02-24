@@ -16,8 +16,10 @@ namespace Assets.Scripts.Dogs
 		{
 			// Get position
 			var position = point.ReadValue<Vector2>();
+			// Get camera
+			var camera = Camera.main;
 			// Check if raycast hits
-			if (Physics.Raycast(Camera.main.ScreenPointToRay(position), out var hit))
+			if (camera != null && Physics.Raycast(camera.ScreenPointToRay(position), out var hit))
 			{
 				// Emit point
 				_point_.Invoke(hit.point);
