@@ -8,6 +8,6 @@ namespace Assets.Scripts.ActionManagement.Interfaces
 	{
 		TTransition GetTransitionIn();
 
-		IEnumerator ExecuteAction(TTransition transitionIn, Func<TTransition?> getTransitionOut);
+		IEnumerator ExecuteAction(TTransition transitionIn, Func<TTransition?> getTransitionOut, Action<TTransition> setTransitionOut);
 	}
 }

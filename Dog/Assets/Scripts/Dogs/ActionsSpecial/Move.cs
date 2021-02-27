@@ -37,8 +37,6 @@ namespace Assets.Scripts.Dogs.ActionsSpecial
 			_plan = _actionPlanner.GetPlan();
 			// Set plan
 			_actionPlanner.PopulatePlan(_plan, _actionPlanner.Actions[0]);
-			// Subscribe to plan completed
-			_actionStateMachine.PlanCompleted_.AddListener(() => _actionStateMachine.CancelAction());
 		}
 
 		public bool IsValid(Dog state) => _actionDestination.IsTraversable(state) && !_actionDestination.IsReached(state);
@@ -55,10 +53,10 @@ namespace Assets.Scripts.Dogs.ActionsSpecial
 			return _actionStateMachine.GetTransitionIn();
 		}
 
-		public IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut)
+		public IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut, Action<float> setTransitionOut)
 		{
 			// Execute action
-			yield return _actionStateMachine.ExecuteAction(transitionIn, getTransitionOut);
+			yield return _actionStateMachine.ExecuteAction(transitionIn, getTransitionOut, setTransitionOut);
 		}
 	}
 }

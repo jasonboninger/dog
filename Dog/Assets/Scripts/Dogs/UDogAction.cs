@@ -40,6 +40,6 @@ namespace Assets.Scripts.Dogs
 
 		public abstract float GetTransitionIn();
 		
-		public abstract IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut);
+		public abstract IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut, Action<float> setTransitionOut);
 	}
 }

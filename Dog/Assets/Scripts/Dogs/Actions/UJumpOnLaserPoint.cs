@@ -41,7 +41,7 @@ namespace Assets.Scripts.Dogs.Actions
 
 		public override float GetTransitionIn() => _transitionTime;
 
-		public override IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut)
+		public override IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut, Action<float> setTransitionOut)
 		{
 			// Execute transition
 			this.StopCoroutineIfExistsAndReplace

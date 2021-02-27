@@ -15,7 +15,7 @@ namespace Assets.Scripts.Dogs.ActionsSpecial
 
 		public float GetTransitionIn() => 0.1f;
 
-		public IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut)
+		public IEnumerator ExecuteAction(float transitionIn, Func<float?> getTransitionOut, Action<float> setTransitionOut)
 		{
 			// Loop while out transition does not exist
 			while (!getTransitionOut().HasValue)

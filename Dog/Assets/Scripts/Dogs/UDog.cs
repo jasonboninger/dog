@@ -68,7 +68,7 @@ namespace Assets.Scripts.Dogs
 			// Get in transition
 			var transitionIn = _actionStateMachine.GetTransitionIn();
 			// Execute actions
-			StartCoroutine(_actionStateMachine.ExecuteAction(transitionIn, getTransitionOut: () => null));
+			StartCoroutine(_actionStateMachine.ExecuteAction(transitionIn, getTransitionOut: () => null, setTransitionOut: transitionOut => { }));
 		}
 
 		protected void OnDestroy()

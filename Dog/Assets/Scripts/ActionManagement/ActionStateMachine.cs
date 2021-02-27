@@ -53,13 +53,16 @@ namespace Assets.Scripts.ActionManagement
 		private bool _cancel;
 		private TTransition? _transitionOutExternal;
 		private TTransition? _transitionOutInternal;
+		private TTransition? _transitionOutAction;
 
-		public ActionStateMachine() { }
-		public ActionStateMachine(IPlan<TState, TActionState> plan) => Plan = plan;
+		private readonly Action<TTransition> _setTransitionOut;
+
+		public ActionStateMachine() => _setTransitionOut = transitionOut => _transitionOutAction = transitionOut;
+		public ActionStateMachine(IPlan<TState, TActionState> plan) : this() => Plan = plan;
 
 		public TTransition GetTransitionIn() => Action?.GetTransitionIn() ?? default;
 
-		public IEnumerator ExecuteAction(TTransition transitionIn, Func<TTransition?> getTransitionOut)
+		public IEnumerator ExecuteAction(TTransition transitionIn, Func<TTransition?> getTransitionOut, Action<TTransition> setTransitionOut)
 		{
 			// Set executing
 			_executing = true;
@@ -71,7 +74,7 @@ namespace Assets.Scripts.ActionManagement
 			while (true)
 			{
 				// Get enumerator
-				var enumerator = Action?.ExecuteAction(transitionIn, getTransitionOutWrapped);
+				var enumerator = Action?.ExecuteAction(transitionIn, getTransitionOutWrapped, _setTransitionOut);
 				// Check if enumerator exists or synchronous cycles is too much
 				if (enumerator != null || synchronousCycles++ > 100)
 				{
@@ -83,24 +86,16 @@ namespace Assets.Scripts.ActionManagement
 				// Check if external out transition or cancel
 				if (_transitionOutExternal.HasValue || _cancel)
 				{
-					// Set no internal out transition
-					_transitionOutInternal = null;
-					// Set plan index
-					_planIndex = 0;
-					// Set not cancel
-					_cancel = false;
-					// Set not executing
-					_executing = false;
 					// Stop loop
-					yield break;
+					break;
 				}
 				// Check if internal out transition
 				if (_transitionOutInternal.HasValue)
 				{
 					// Set in transition
 					transitionIn = _transitionOutInternal.Value;
-					// Set no internal out transition
-					_transitionOutInternal = null;
+					// Clear transitions
+					_ClearTransitions();
 				}
 				else
 				{
@@ -112,10 +107,34 @@ namespace Assets.Scripts.ActionManagement
 						// Emit plan completed
 						_planCompleted_.Invoke();
 					}
+					// Get action
+					var action = Action;
+					// Check if action does not exist
+					if (action == null)
+					{
+						// Check if action out transition exists
+						if (_transitionOutAction.HasValue)
+						{
+							// Set out transition
+							setTransitionOut(_transitionOutAction.Value);
+						}
+						// Stop loop
+						break;
+					}
 					// Set in transition
-					transitionIn = Action?.GetTransitionIn() ?? default;
+					transitionIn = _transitionOutAction ?? action.GetTransitionIn();
+					// Clear transitions
+					_ClearTransitions();
 				}
 			}
+			// Clear transitions
+			_ClearTransitions();
+			// Set plan index
+			_planIndex = 0;
+			// Set not cancel
+			_cancel = false;
+			// Set not executing
+			_executing = false;
 		}
 
 		public void CancelAction()
@@ -134,6 +153,16 @@ namespace Assets.Scripts.ActionManagement
 				// Return external out transition or internal out transition or cancel
 				return _transitionOutExternal ?? _transitionOutInternal ?? (_cancel ? default(TTransition) : (TTransition?)null);
 			};
+		}
+
+		private void _ClearTransitions()
+		{
+			// Set no external out transition
+			_transitionOutExternal = null;
+			// Set no internal out transition
+			_transitionOutInternal = null;
+			// Set no action out transition
+			_transitionOutAction = null;
 		}
 	}
 }
