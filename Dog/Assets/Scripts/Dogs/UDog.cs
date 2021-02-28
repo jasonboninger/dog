@@ -25,6 +25,9 @@ namespace Assets.Scripts.Dogs
 		private IPlan<Dog, IDogAction> _planTest;
 		private Controls _controls;
 		private IGoal<Dog> _goal;
+		private IGoal<Dog> _goalGetLaserPoint;
+		private IGoal<Dog> _goalSearchForLaserPoint;
+		private IGoal<Dog> _goalHangOut;
 		private UDogOwner _owner;
 		private IDogAction _actionDefault;
 		private Vector2 _position;
@@ -45,8 +48,10 @@ namespace Assets.Scripts.Dogs
 			_actionStateMachine = new ActionStateMachine<Dog, IDogAction, float>();
 			// Set controls
 			_controls = new Controls(_state, transform, GetComponent<Animator>(), new Looker());
-			// Set goal
-			_goal = new GetLaserPoint();
+			// Set goals
+			_goalGetLaserPoint = new GetLaserPoint();
+			_goalSearchForLaserPoint = new SearchForLaserPoint();
+			_goalHangOut = new HangOut();
 			// Set owner
 			_owner = GetComponent<UDogOwner>();
 			// Subscribe to point
@@ -61,6 +66,8 @@ namespace Assets.Scripts.Dogs
 			_InitializeActions();
 			// Set state
 			_SetState();
+			// Set goal
+			_SetGoal();
 			// Set plan
 			_SetPlan();
 			// Subscribe to plan completed
@@ -83,6 +90,8 @@ namespace Assets.Scripts.Dogs
 		{
 			// Set state
 			_SetState();
+			// Set goal
+			_SetGoal();
 			// Set plan
 			_SetPlan();
 		}
@@ -131,6 +140,21 @@ namespace Assets.Scripts.Dogs
 			_state.Speed = position - _position;
 			// Set position
 			_position = position;
+		}
+
+		private void _SetGoal()
+		{
+			// Check if laser pointer is on and visible
+			if (_state.LaserPointer.On && _state.LaserPointer.Visible)
+			{
+				// Set goal
+				_goal = _goalGetLaserPoint;
+			}
+			else
+			{
+				// Set goal
+				_goal = _goalHangOut;
+			}
 		}
 
 		private void _SetPlan()
