@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 namespace Assets.Scripts
 {
 	[RequireComponent(typeof(Animator))]
-	public class UDog : MonoBehaviour
+	public class UDogTest : MonoBehaviour
 	{
 		[SerializeField] private float _speedMaximum = default;
 		[SerializeField] private float _speedMinimum = default;

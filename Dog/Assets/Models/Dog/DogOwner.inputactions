@@ -1,0 +1,52 @@
+{
+    "name": "Owner",
+    "maps": [
+        {
+            "name": "Interaction",
+            "id": "02e4aaed-0df9-4167-a50a-caa1207ca638",
+            "actions": [
+                {
+                    "name": "Click",
+                    "type": "Button",
+                    "id": "3e080f73-a10f-404a-8688-f219904cb3e2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Point",
+                    "type": "Value",
+                    "id": "ddda135e-4c48-42df-acc2-db9acc14e4da",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "3bea6920-c4a5-4b92-b36a-481dea8d6b04",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2e2dbd9c-0ef6-4a5a-a00d-8ccee7f9934d",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Point",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

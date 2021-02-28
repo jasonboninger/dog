@@ -33,8 +33,8 @@ namespace Assets.Scripts.Dogs
 
 		public void Click(InputAction.CallbackContext click)
 		{
-			// Check if pressed
-			if (click.control.IsPressed())
+			// Check if performed
+			if (click.performed)
 			{
 				// Emit click
 				_click_.Invoke();

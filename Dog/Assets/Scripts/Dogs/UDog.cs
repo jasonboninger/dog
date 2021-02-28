@@ -11,13 +11,12 @@ using UnityEngine;
 
 namespace Assets.Scripts.Dogs
 {
-	[RequireComponent(typeof(Animator))]
-	[RequireComponent(typeof(UDogOwner))]
 	public class UDog : MonoBehaviour
 	{
 		[SerializeField] private Transform _actionsContainer = default;
 		[SerializeField] private Transform _actionsMovementContainer = default;
 
+		private Animator _animator;
 		private ActionPlanner<Dog, IDogAction> _actionPlanner;
 		private ActionStateMachine<Dog, IDogAction, float> _actionStateMachine;
 		private Dog _state;
@@ -34,11 +33,13 @@ namespace Assets.Scripts.Dogs
 
 		protected void Awake()
 		{
+			// Set animator
+			_animator = GetComponentInChildren<Animator>();
 			// Set action planner
 			_actionPlanner = new ActionPlanner<Dog, IDogAction>();
 			// Set state
 			_state = _actionPlanner.GetState();
-			_state.Position = new Vector2(transform.position.x, transform.position.z);
+			_state.Position = new Vector2(_animator.transform.position.x, _animator.transform.position.z);
 			_state.Speed = new Vector2(0, 0);
 			// Set active plan
 			_planActive = _actionPlanner.GetPlan();
@@ -47,17 +48,23 @@ namespace Assets.Scripts.Dogs
 			// Set action state machine
 			_actionStateMachine = new ActionStateMachine<Dog, IDogAction, float>();
 			// Set controls
-			_controls = new Controls(_state, transform, GetComponent<Animator>(), new Looker());
+			_controls = new Controls(_state, _animator.transform, _animator, new Looker());
 			// Set goals
 			_goalGetLaserPoint = new GetLaserPoint();
 			_goalSearchForLaserPoint = new SearchForLaserPoint();
 			_goalHangOut = new HangOut();
+		}
+
+		public UDog Initialize(UDogOwner owner)
+		{
 			// Set owner
-			_owner = GetComponent<UDogOwner>();
+			_owner = owner;
 			// Subscribe to point
 			_owner.Point_.AddListener(_AimLaserPointer);
 			// Subscribe to click
 			_owner.Click_.AddListener(_ToggleLaserPointer);
+			// Return self
+			return this;
 		}
 
 		protected void Start()
@@ -133,7 +140,7 @@ namespace Assets.Scripts.Dogs
 		private void _SetState()
 		{
 			// Get position
-			var position = new Vector2(transform.position.x, transform.position.z);
+			var position = new Vector2(_animator.transform.position.x, _animator.transform.position.z);
 			// Set position
 			_state.Position = position;
 			// Set speed
