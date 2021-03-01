@@ -13,6 +13,7 @@ namespace Assets.Scripts.Dogs
 		protected Dog State { get; private set; }
 		protected Transform Transform { get; private set; }
 		protected Animator Animator { get; private set; }
+		protected UDogOwner Owner { get; private set; }
 		protected Looker Looker { get; private set; }
 
 		protected abstract void Initialize();
@@ -26,6 +27,8 @@ namespace Assets.Scripts.Dogs
 			Transform = controls.Transform;
 			// Set animator
 			Animator = controls.Animator;
+			// Set owner
+			Owner = controls.Owner;
 			// Set looker
 			Looker = controls.Looker;
 			// Execute intialize

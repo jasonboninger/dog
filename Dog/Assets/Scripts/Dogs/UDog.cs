@@ -22,12 +22,12 @@ namespace Assets.Scripts.Dogs
 		private Dog _state;
 		private IPlan<Dog, IDogAction> _planActive;
 		private IPlan<Dog, IDogAction> _planTest;
-		private Controls _controls;
 		private IGoal<Dog> _goal;
 		private IGoal<Dog> _goalGetLaserPoint;
 		private IGoal<Dog> _goalSearchForLaserPoint;
 		private IGoal<Dog> _goalHangOut;
 		private UDogOwner _owner;
+		private Controls _controls;
 		private IDogAction _actionDefault;
 		private Vector2 _position;
 
@@ -47,8 +47,6 @@ namespace Assets.Scripts.Dogs
 			_planTest = _actionPlanner.GetPlan();
 			// Set action state machine
 			_actionStateMachine = new ActionStateMachine<Dog, IDogAction, float>();
-			// Set controls
-			_controls = new Controls(_state, _animator.transform, _animator, new Looker());
 			// Set goals
 			_goalGetLaserPoint = new GetLaserPoint();
 			_goalSearchForLaserPoint = new SearchForLaserPoint();
@@ -59,10 +57,8 @@ namespace Assets.Scripts.Dogs
 		{
 			// Set owner
 			_owner = owner;
-			// Subscribe to point
-			_owner.Point_.AddListener(_AimLaserPointer);
-			// Subscribe to click
-			_owner.Click_.AddListener(_ToggleLaserPointer);
+			// Set controls
+			_controls = new Controls(_state, _animator.transform, _animator, _owner, new Looker());
 			// Return self
 			return this;
 		}
@@ -83,14 +79,6 @@ namespace Assets.Scripts.Dogs
 			var transitionIn = _actionStateMachine.GetTransitionIn();
 			// Execute actions
 			StartCoroutine(_actionStateMachine.ExecuteAction(transitionIn, getTransitionOut: () => null, setTransitionOut: transitionOut => { }));
-		}
-
-		protected void OnDestroy()
-		{
-			// Unsubscribe from point
-			_owner.Point_.RemoveListener(_AimLaserPointer);
-			// Unsubscribe from click
-			_owner.Click_.RemoveListener(_ToggleLaserPointer);
 		}
 
 		protected void Update()
@@ -147,12 +135,16 @@ namespace Assets.Scripts.Dogs
 			_state.Speed = position - _position;
 			// Set position
 			_position = position;
+			// Set laser pointer position
+			_state.LaserPointer.Position = _owner.LaserPointer.Position.HasValue
+				? new Vector2(_owner.LaserPointer.Position.Value.x, _owner.LaserPointer.Position.Value.z)
+				: default;
 		}
 
 		private void _SetGoal()
 		{
-			// Check if laser pointer is on and visible
-			if (_state.LaserPointer.On && _state.LaserPointer.Visible)
+			// Check if laser pointer is on and position exists
+			if (_owner.LaserPointer.On && _owner.LaserPointer.Position.HasValue)
 			{
 				// Set goal
 				_goal = _goalGetLaserPoint;
@@ -182,29 +174,6 @@ namespace Assets.Scripts.Dogs
 			_planActive = _planTest;
 			// Set test plan
 			_planTest = planActive;
-		}
-
-		private void _AimLaserPointer(Vector3? position)
-		{
-			// Check if position exists
-			if (position.HasValue)
-			{
-				// Set laser pointer visible
-				_state.LaserPointer.Visible = true;
-				// Set laser pointer position
-				_state.LaserPointer.Position = new Vector2(position.Value.x, position.Value.z);
-			}
-			else
-			{
-				// Set laser pointer not visible
-				_state.LaserPointer.Visible = false;
-			}
-		}
-
-		private void _ToggleLaserPointer()
-		{
-			// Set laser pointer on/off
-			_state.LaserPointer.On = !_state.LaserPointer.On;
 		}
 	}
 }

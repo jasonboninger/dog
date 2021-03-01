@@ -5,27 +5,18 @@ namespace Assets.Scripts.Dogs.States
 {
 	public class LaserPointer : IState<LaserPointer>
 	{
-		public bool On { get; set; }
-		public bool Visible { get; set; }
-		public bool Caught { get; set; }
-		public bool Found { get; set; }
+		public bool Never { get; set; }
 		public Vector2 Position { get; set; }
 
 		public void Reset()
 		{
-			On = false;
-			Visible = false;
-			Caught = false;
-			Found = false;
+			Never = false;
 			Position = default;
 		}
 
 		public void Set(LaserPointer state)
 		{
-			On = state.On;
-			Visible = state.Visible;
-			Caught = state.Caught;
-			Found = state.Found;
+			Never = state.Never;
 			Position = state.Position;
 		}
 	}

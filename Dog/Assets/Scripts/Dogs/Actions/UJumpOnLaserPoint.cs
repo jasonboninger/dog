@@ -28,15 +28,15 @@ namespace Assets.Scripts.Dogs.Actions
 
 		public override float GetCost(Dog state) => 1;
 
-		public override void UpdateState(Dog state) => state.LaserPointer.Caught = true;
+		public override void UpdateState(Dog state) => state.LaserPointer.Never = true;
 
-		public bool IsTraversable() => IsTraversable(State);
-		public bool IsTraversable(Dog state) => state.LaserPointer.On && state.LaserPointer.Visible;
+		public bool IsTraversable() => Owner.LaserPointer.On && Owner.LaserPointer.Position.HasValue;
+		public bool IsTraversable(Dog state) => true;
 
-		public Vector2 GetPosition() => GetPosition(State);
+		public Vector2 GetPosition() => new Vector2(Owner.LaserPointer.Position.Value.x, Owner.LaserPointer.Position.Value.z);
 		public Vector2 GetPosition(Dog state) => state.LaserPointer.Position;
 
-		public bool IsReached() => IsReached(State);
+		public bool IsReached() => new Vector2(Transform.position.x, Transform.position.z) == GetPosition();
 		public bool IsReached(Dog state) => state.Position.Equals(state.LaserPointer.Position);
 
 		public override float GetTransitionIn() => _transitionTime;

@@ -1,4 +1,4 @@
-﻿using BoningerWorks.Events;
+﻿using Assets.Scripts.Dogs.Interfaces;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,11 +6,14 @@ namespace Assets.Scripts.Dogs
 {
 	public class UDogOwner : MonoBehaviour
 	{
-		private readonly BwEvent _click_ = new BwEvent();
-		public IBwEvent Click_ => _click_;
+		private class DogLaserPointer : IDogLaserPointer
+		{
+			public bool On { get; set; }
+			public Vector3? Position { get; set; }
+		}
 
-		private readonly BwEvent<Vector3?> _point_ = new BwEvent<Vector3?>();
-		public IBwEvent<Vector3?> Point_ => _point_;
+		private readonly DogLaserPointer _laserPointer = new DogLaserPointer();
+		public IDogLaserPointer LaserPointer => _laserPointer;
 
 		public void Point(InputAction.CallbackContext point)
 		{
@@ -21,13 +24,13 @@ namespace Assets.Scripts.Dogs
 			// Check if raycast hits
 			if (camera != null && Physics.Raycast(camera.ScreenPointToRay(position), out var hit))
 			{
-				// Emit point
-				_point_.Invoke(hit.point);
+				// Set position
+				_laserPointer.Position = hit.point;
 			}
 			else
 			{
-				// Emit no point
-				_point_.Invoke(null);
+				// Set no position
+				_laserPointer.Position = null;
 			}
 		}
 
@@ -36,8 +39,8 @@ namespace Assets.Scripts.Dogs
 			// Check if performed
 			if (click.performed)
 			{
-				// Emit click
-				_click_.Invoke();
+				// Toggle laser pointer on
+				_laserPointer.On ^= true;
 			}
 		}
 	}
