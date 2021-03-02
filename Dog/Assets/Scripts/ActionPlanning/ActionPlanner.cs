@@ -46,7 +46,7 @@ namespace Assets.Scripts.ActionPlanning
 			return _plans.GetOrCreate();
 		}
 
-		public void PopulatePlan(IPlan<TState, TAction> plan, TState state, IGoal<TState> goal)
+		public void PopulatePlan(IPlan<TState, TAction> plan, TState state, IGoal<TState, TAction> goal)
 		{
 			// Get converted plan
 			var planConverted = (Plan)plan;

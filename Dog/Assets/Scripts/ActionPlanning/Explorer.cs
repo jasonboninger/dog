@@ -110,7 +110,7 @@ namespace Assets.Scripts.ActionPlanning
 				public float costEstimated;
 			}
 
-			private IGoal<TState> _goal;
+			private IGoal<TState, TAction> _goal;
 
 			private readonly int _cyclesLimit;
 			private readonly Steps _steps;
@@ -132,7 +132,7 @@ namespace Assets.Scripts.ActionPlanning
 				_actions = actions;
 			}
 
-			public void PopulatePlan(Plan plan, TState state, IGoal<TState> goal)
+			public void PopulatePlan(Plan plan, TState state, IGoal<TState, TAction> goal)
 			{
 				// Reset cache
 				_ResetCache();
@@ -219,6 +219,16 @@ namespace Assets.Scripts.ActionPlanning
 				var actions = _actions;
 				// Get count
 				var count = actions.Count;
+				// Run through actions
+				for (int i = 0; i < count; i++)
+				{
+					// Add action point
+					_AddActionPoint(actionPoint, state, actions[i]);
+				}
+				// Set actions
+				actions = _goal.Actions;
+				// Set count
+				count = actions.Count;
 				// Run through actions
 				for (int i = 0; i < count; i++)
 				{
