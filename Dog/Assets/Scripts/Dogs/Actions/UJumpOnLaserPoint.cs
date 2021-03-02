@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Dogs.Actions
 {
-	public class UJumpOnLaserPoint : UDogAction, IDogActionDestination
+	public class UJumpOnLaserPoint : UDogActionStandard, IDogActionDestination
 	{
 		[SerializeField] private float _transitionTime = 0;
 		[SerializeField] private bool _slowOnApproach = true;
@@ -17,6 +17,8 @@ namespace Assets.Scripts.Dogs.Actions
 
 		private AnimatorLayer _jumpOn;
 		private Coroutine _enteringExiting;
+
+		public UJumpOnLaserPoint() : base(global: false) { }
 
 		protected override void Initialize()
 		{

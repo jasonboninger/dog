@@ -7,6 +7,8 @@ using Assets.Scripts.Dogs.Goals;
 using Assets.Scripts.Dogs.Interfaces;
 using Assets.Scripts.Dogs.Models;
 using Assets.Scripts.Dogs.States;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Dogs
@@ -22,14 +24,17 @@ namespace Assets.Scripts.Dogs
 		private Dog _state;
 		private IPlan<Dog, IDogAction> _planActive;
 		private IPlan<Dog, IDogAction> _planTest;
-		private IGoal<Dog> _goal;
-		private IGoal<Dog> _goalGetLaserPoint;
-		private IGoal<Dog> _goalSearchForLaserPoint;
-		private IGoal<Dog> _goalHangOut;
+		private IGoal<Dog, IDogAction> _goal;
+		private GetLaserPoint _goalGetLaserPoint;
+		private SearchForLaserPoint _goalSearchForLaserPoint;
+		private HangOut _goalHangOut;
 		private UDogOwner _owner;
 		private Controls _controls;
 		private IDogAction _actionDefault;
 		private Vector2 _position;
+
+		private readonly Dictionary<Type, IDogAction> _actionsStandard = new Dictionary<Type, IDogAction>();
+		private readonly Dictionary<Type, IDogAction> _actionsMovement = new Dictionary<Type, IDogAction>();
 
 		protected void Awake()
 		{
@@ -47,10 +52,6 @@ namespace Assets.Scripts.Dogs
 			_planTest = _actionPlanner.GetPlan();
 			// Set action state machine
 			_actionStateMachine = new ActionStateMachine<Dog, IDogAction, float>();
-			// Set goals
-			_goalGetLaserPoint = new GetLaserPoint();
-			_goalSearchForLaserPoint = new SearchForLaserPoint();
-			_goalHangOut = new HangOut();
 		}
 
 		public UDog Initialize(UDogOwner owner)
@@ -67,6 +68,8 @@ namespace Assets.Scripts.Dogs
 		{
 			// Initialize actions
 			_InitializeActions();
+			// Initialize goals
+			_InitializeGoals();
 			// Set state
 			_SetState();
 			// Set goal
@@ -105,23 +108,64 @@ namespace Assets.Scripts.Dogs
 				actionMovement.Initialize(_controls);
 			}
 			// Get actions
-			var actions = _actionsContainer.GetComponentsInChildren<UDogAction>();
+			var actions = _actionsContainer.GetComponentsInChildren<UDogActionStandard>();
 			// Add and initialize actions
 			for (int i = 0; i < actions.Length; i++)
 			{
 				var action = actions[i];
+				// Get global
+				var global = action.Global;
+				// Get type
+				var type = action.GetType();
 				// Initialize action
 				action.Initialize(_controls);
-				// Add action
-				_actionPlanner.AddAction(action);
+				// Check if global
+				if (global)
+				{
+					// Add global standard action
+					_actionPlanner.AddAction(action);
+				}
+				else
+				{
+					// Add standard action
+					_actionsStandard.Add(type, action);
+				}
 				// Check if destination action
 				if (action is IDogActionDestination actionDestination)
 				{
 					// Create movement action
 					var actionMovement = new Move(action.gameObject, actionsMovement, actionDestination);
-					// Add movement action
-					_actionPlanner.AddAction(actionMovement);
+					// Check if global
+					if (global)
+					{
+						// Add global movement action
+						_actionPlanner.AddAction(actionMovement);
+					}
+					else
+					{
+						// Add movement action
+						_actionsMovement.Add(type, actionMovement);
+					}
 				}
+			}
+		}
+
+		private void _InitializeGoals()
+		{
+			// Create goals
+			var goals = new Goal[]
+			{
+#pragma warning disable S1121 // Assignments should not be made from within sub-expressions
+				_goalGetLaserPoint = new GetLaserPoint(),
+				_goalSearchForLaserPoint = new SearchForLaserPoint(),
+				_goalHangOut = new HangOut(),
+#pragma warning restore S1121 // Assignments should not be made from within sub-expressions
+			};
+			// Run through goals
+			for (int i = 0; i < goals.Length; i++)
+			{
+				// Initialize goal
+				goals[i].Initialize(_actionsStandard, _actionsMovement);
 			}
 		}
 

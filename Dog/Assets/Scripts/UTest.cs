@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.ActionPlanning;
 using Assets.Scripts.ActionPlanning.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -114,8 +116,10 @@ namespace Assets.Scripts
 			public override bool IsValid(State state) => state.posture != EPosture.Laying;
 		}
 
-		private class Goal : IGoal<State>
+		private class Goal : IGoal<State, Action>
 		{
+			public IReadOnlyList<Action> Actions { get; } = Array.Empty<Action>();
+
 			public bool IsAchieved(State state) => state.enemy.health <= 0;
 			
 			public float EstimateProximity(State state) => state.enemy.health * 3;

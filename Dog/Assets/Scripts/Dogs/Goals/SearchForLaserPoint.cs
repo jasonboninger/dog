@@ -1,12 +1,11 @@
-﻿using Assets.Scripts.ActionPlanning.Interfaces;
-using Assets.Scripts.Dogs.States;
+﻿using Assets.Scripts.Dogs.States;
 
 namespace Assets.Scripts.Dogs.Goals
 {
-	public class SearchForLaserPoint : IGoal<Dog>
+	public class SearchForLaserPoint : Goal
 	{
-		public bool IsAchieved(Dog state) => state.LaserPointer.Never;
+		public override bool IsAchieved(Dog state) => state.LaserPointer.Never;
 		
-		public float EstimateProximity(Dog state) => 0;
+		public override float EstimateProximity(Dog state) => 0;
 	}
 }
